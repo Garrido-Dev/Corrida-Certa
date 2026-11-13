@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta principal Material 3 (Modo Claro) -->
+    <color name="md_theme_primary">#0F172A</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#E2E8F0</color>
+    <color name="md_theme_onPrimaryContainer">#0F172A</color>
+
+    <color name="md_theme_secondary">#0284C7</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_secondaryContainer">#E0F2FE</color>
+    <color name="md_theme_onSecondaryContainer">#075985</color>
+
+    <color name="md_theme_background">#F4F6F9</color>
+    <color name="md_theme_onBackground">#0F172A</color>
+    <color name="md_theme_surface">#FFFFFF</color>
+    <color name="md_theme_onSurface">#0F172A</color>
+    <color name="md_theme_surfaceVariant">#F1F5F9</color>
+    <color name="md_theme_onSurfaceVariant">#475569</color>
+    <color name="md_theme_outline">#CBD5E1</color>
+    <color name="md_theme_outlineVariant">#E2E8F0</color>
+
+    <!-- Cores do Semáforo Rota Pro -->
+    <color name="verdict_accept_bg">#DCFCE7</color>
+    <color name="verdict_accept_accent">#10B981</color>
+    <color name="verdict_accept_text">#065F46</color>
+
+    <color name="verdict_caution_bg">#FEF3C7</color>
+    <color name="verdict_caution_accent">#F59E0B</color>
+    <color name="verdict_caution_text">#92400E</color>
+
+    <color name="verdict_reject_bg">#FEE2E2</color>
+    <color name="verdict_reject_accent">#EF4444</color>
+    <color name="verdict_reject_text">#991B1B</color>
+
+    <color name="verdict_idle_bg">#E2E8F0</color>
+    <color name="verdict_idle_accent">#64748B</color>
+    <color name="verdict_idle_text">#334155</color>
+
+    <color name="splash_background">#0E1A32</color>
+</resources>

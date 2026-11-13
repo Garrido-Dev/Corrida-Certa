@@ -1,0 +1,227 @@
+<resources>
+    <string name="app_name">Rota Pro</string>
+    <string name="app_subtitle">Decisão rápida para motoristas de app</string>
+    <string name="phase_badge">v1.0 • Rota Pro</string>
+
+    <!-- Semáforo / Resultado -->
+    <string name="verdict_idle_title">Aguardando dados</string>
+    <string name="verdict_idle_desc">Preencha os dados da corrida abaixo ou escolha um cenário rápido para testar o cálculo.</string>
+    <string name="verdict_accept_title">ACEITAR CORRIDA</string>
+    <string name="verdict_accept_desc">Atinge suas metas de R$/km, R$/h e gera lucro líquido positivo.</string>
+    <string name="verdict_caution_title">AVALIAR CORRIDA</string>
+    <string name="verdict_caution_desc">Rentabilidade até 20% abaixo da sua meta ideal, mas ainda lucrativa.</string>
+    <string name="verdict_reject_title">RECUSAR CORRIDA</string>
+    <string name="verdict_reject_desc">Abaixo do limite mínimo de rentabilidade para o seu veículo.</string>
+    <string name="verdict_loss_desc">Atenção: o custo operacional supera o valor pago pela corrida (prejuízo).</string>
+
+    <!-- Métricas do resultado -->
+    <string name="metric_gross_per_km_label">Bruto / km</string>
+    <string name="metric_gross_per_hour_label">Bruto / hora</string>
+    <string name="metric_profit_label">Lucro líquido</string>
+    <string name="metric_net_per_km_label">Líquido / km</string>
+    <string name="metric_summary_format">Distância total: %1$.1f km • Tempo total: %2$.0f min • Custo: %3$s</string>
+    <string name="metric_placeholder">—</string>
+
+    <!-- Cenários rápidos de validação -->
+    <string name="presets_title">Cenários rápidos de teste</string>
+    <string name="preset_accept">Boa (Aceitar)</string>
+    <string name="preset_caution">Média (Avaliar)</string>
+    <string name="preset_reject">Fraca (Recusar)</string>
+    <string name="preset_loss">Prejuízo</string>
+
+    <!-- Formulário da corrida -->
+    <string name="section_ride_offer_title">Dados da oferta de corrida</string>
+    <string name="hint_fare">Valor da corrida (R$)</string>
+    <string name="hint_pickup_km">Busca até passageiro (km)</string>
+    <string name="hint_pickup_min">Tempo de busca (min)</string>
+    <string name="hint_trip_km">Distância da viagem (km)</string>
+    <string name="hint_trip_min">Duração da viagem (min)</string>
+
+    <!-- Parâmetros ativos na MainActivity -->
+    <string name="section_settings_title">Custos do veículo e metas</string>
+    <string name="settings_cost_per_km_format">Custo real: %1$s / km</string>
+    <string name="settings_targets_summary_format">Metas ativas: %1$s / km • %2$s / hora</string>
+    <string name="action_open_settings">Configurar</string>
+    <string name="action_open_vehicle_costs">Editar custos</string>
+    <string name="action_open_goals">Editar metas</string>
+
+    <!-- Tela de Configurações (Fase 2) -->
+    <string name="settings_screen_title">Configurações</string>
+    <string name="settings_tab_vehicle">Custos do veículo</string>
+    <string name="settings_tab_goals">Metas (R$/km e R$/h)</string>
+    <string name="settings_preview_title">Custo operacional por km</string>
+    <string name="settings_preview_formula_format">Combustível (%1$s) + Manutenção (%2$s) + Depreciação (%3$s)</string>
+    <string name="settings_preview_targets_format">Metas atuais: %1$s/km e %2$s/h</string>
+
+    <string name="hint_fuel_price">Combustível (R$/L)</string>
+    <string name="helper_fuel_price">Preço médio pago por litro na bomba</string>
+    <string name="hint_consumption">Consumo (km/L)</string>
+    <string name="helper_consumption">Média real do veículo no trânsito urbano</string>
+    <string name="hint_maintenance">Manutenção (R$/km)</string>
+    <string name="helper_maintenance">Óleo, pneus, freios e revisões diluídos por km</string>
+    <string name="hint_depreciation">Depreciação (R$/km)</string>
+    <string name="helper_depreciation">Desgaste e perda de valor do carro por km</string>
+    <string name="hint_target_per_km">Meta mínima (R$/km)</string>
+    <string name="helper_target_per_km">Valor bruto mínimo desejado por km rodado</string>
+    <string name="hint_target_per_hour">Meta mínima (R$/h)</string>
+    <string name="helper_target_per_hour">Faturamento bruto mínimo desejado por hora</string>
+
+    <string name="goals_rules_card_title">Como suas metas controlam o semáforo</string>
+    <string name="goals_rules_accept">Verde (Aceitar): atinge 100% da meta de R$/km e R$/h com lucro positivo.</string>
+    <string name="goals_rules_caution">Amarelo (Avaliar): fica até 20% abaixo de qualquer meta, mas ainda gera lucro.</string>
+    <string name="goals_rules_reject">Vermelho (Recusar): abaixo de 80% de qualquer meta ou com prejuízo.</string>
+
+    <string name="action_save_settings">Salvar configurações</string>
+    <string name="action_reset_defaults">Restaurar padrão</string>
+    <string name="msg_settings_saved">Configurações salvas no dispositivo</string>
+    <string name="msg_settings_reset">Valores padrão restaurados</string>
+
+    <!-- Ações -->
+    <string name="action_analyze">Analisar corrida</string>
+    <string name="action_clear">Limpar</string>
+
+    <!-- Validação -->
+    <string name="error_invalid_number">Informe um número válido</string>
+    <string name="error_must_be_positive">Valor deve ser maior que zero</string>
+    <string name="error_cannot_be_negative">Valor não pode ser negativo</string>
+    <string name="error_total_distance_zero">A distância total deve ser maior que zero</string>
+    <string name="error_total_time_zero">O tempo total deve ser maior que zero</string>
+
+    <!-- Acessibilidade (Content Descriptions) -->
+    <string name="cd_verdict_icon">Ícone do veredito do semáforo</string>
+    <string name="cd_vehicle_icon">Ícone de veículo</string>
+    <string name="cd_route_icon">Ícone de rota da corrida</string>
+    <string name="cd_back_button">Voltar para a tela inicial</string>
+    <string name="cd_settings_button">Abrir configurações de custos e metas</string>
+    <string name="cd_accessibility_icon">Ícone do serviço de acessibilidade</string>
+
+    <!-- Acessibilidade / Leitura Automática (Fase 3) -->
+    <string name="accessibility_service_label">Rota Pro • Leitor de Corridas</string>
+    <string name="accessibility_service_description">Lê apenas cards de oferta de corrida nos apps Uber, 99 e inDrive localmente no seu aparelho para calcular R$/km, R$/h e lucro em tempo real. Nenhum dado é enviado para servidores externos.</string>
+
+    <string name="accessibility_card_title">Leitura automática de corridas</string>
+    <string name="accessibility_status_active">Serviço ativo (Uber, 99 e inDrive)</string>
+    <string name="accessibility_status_inactive">Serviço desativado</string>
+    <string name="accessibility_status_active_desc">O Rota Pro está pronto para ler cards de oferta automaticamente.</string>
+    <string name="accessibility_status_inactive_desc">Ative a Acessibilidade para analisar ofertas na tela da Uber, 99 e inDrive.</string>
+    <string name="action_open_accessibility_guide">Instruções de ativação</string>
+
+    <string name="accessibility_guide_title">Ativar leitura automática</string>
+    <string name="accessibility_guide_privacy_title">Privacidade garantida no aparelho</string>
+    <string name="accessibility_guide_privacy_desc">O Rota Pro monitora apenas Uber, 99 e inDrive localmente. Seus ganhos e trajetos nunca são registrados em logs nem enviados para fora do celular.</string>
+    <string name="accessibility_guide_steps_title">Passo a passo para ativar</string>
+    <string name="accessibility_step_1">1. Toque no botão "Abrir Acessibilidade" abaixo.</string>
+    <string name="accessibility_step_2">2. Acesse "Apps instalados" ou "Serviços transferidos".</string>
+    <string name="accessibility_step_3">3. Selecione "Rota Pro • Leitor de Corridas".</string>
+    <string name="accessibility_step_4">4. Ative a chave principal e confirme a permissão.</string>
+    <string name="action_open_android_accessibility">Abrir Acessibilidade</string>
+    <string name="error_open_accessibility_settings">Não foi possível abrir as configurações de acessibilidade neste aparelho.</string>
+
+    <!-- Overlay Flutuante (Fase 4) -->
+    <string name="overlay_card_title">Card flutuante (Overlay)</string>
+    <string name="overlay_status_granted">Permissão de sobreposição concedida</string>
+    <string name="overlay_status_denied">Permissão de sobreposição pendente</string>
+    <string name="action_request_overlay_permission">Permitir sobreposição</string>
+    <string name="action_test_overlay">Testar overlay flutuante</string>
+    <string name="msg_overlay_permission_required">Ative a permissão "Sobrepor a outros apps" para exibir o card flutuante.</string>
+    <string name="error_open_overlay_settings">Não foi possível abrir as configurações de sobreposição neste aparelho.</string>
+
+    <string name="overlay_verdict_accept">ACEITAR</string>
+    <string name="overlay_verdict_caution">AVALIAR</string>
+    <string name="overlay_verdict_reject">RECUSAR</string>
+    <string name="overlay_metric_per_km">R$/km</string>
+    <string name="overlay_metric_per_hour">R$/hora</string>
+    <string name="overlay_metric_profit">Lucro</string>
+    <string name="overlay_hint_gestures">Toque para detalhes • Arraste • Deslize para fechar</string>
+    <string name="overlay_details_format">Valor: %1$s • Trajeto: %2$.1f km (%3$.0f min)\nCusto real: %4$s • Líquido/km: %5$s</string>
+    <string name="overlay_action_open_app">Abrir no Rota Pro</string>
+    <string name="overlay_app_simulation">Simulação</string>
+    <string name="cd_overlay_close">Fechar card flutuante</string>
+    <string name="cd_overlay_icon">Ícone do semáforo no overlay</string>
+
+    <string name="overlay_notification_channel_name">Leitor de Corridas (Overlay)</string>
+    <string name="overlay_notification_channel_desc">Mantém o card flutuante de decisão rápida disponível sobre os apps de transporte.</string>
+    <string name="overlay_notification_title">Rota Pro monitorando corridas</string>
+    <string name="overlay_notification_text">Card flutuante pronto para exibir análises em tempo real.</string>
+
+    <!-- Histórico e Estatísticas (Fase 5) -->
+    <string name="history_screen_title">Histórico e Estatísticas</string>
+    <string name="action_open_history">Histórico</string>
+    <string name="action_open_stats">Estatísticas</string>
+    <string name="history_tab_list">Histórico</string>
+    <string name="history_tab_stats">Estatísticas</string>
+    <string name="history_filter_today">Hoje</string>
+    <string name="history_filter_7_days">7 dias</string>
+    <string name="history_filter_30_days">30 dias</string>
+
+    <string name="stats_acceptance_rate_label">Taxa de aceite</string>
+    <string name="stats_avg_per_km_label">R$/km médio</string>
+    <string name="stats_total_profit_label">Lucro total</string>
+    <string name="stats_time_saved_label">Tempo economizado</string>
+    <string name="stats_percent_format">%1$.0f%%</string>
+    <string name="stats_time_saved_format">%1$.0f min</string>
+    <string name="stats_breakdown_title">Distribuição de corridas no período</string>
+    <string name="stats_breakdown_format">Total: %1$d • Aceitas: %2$d • Avaliar: %3$d • Recusadas: %4$d</string>
+    <string name="stats_profit_note">Lucro total soma corridas aceitas e avaliadas; tempo economizado soma a duração das recusadas.</string>
+
+    <string name="history_item_metrics_format">%1$.1f km • %2$.0f min • %3$s/km • %4$s/h</string>
+    <string name="history_item_profit_format">Lucro: %1$s</string>
+    <string name="history_empty_title">Nenhuma corrida neste período</string>
+    <string name="history_empty_desc">Analise uma corrida no simulador ou ative a leitura automática para acompanhar seu desempenho.</string>
+    <string name="history_simulator_app_name">Simulador</string>
+
+    <string name="action_clear_history">Limpar histórico</string>
+    <string name="dialog_clear_history_title">Limpar histórico?</string>
+    <string name="dialog_clear_history_message">Todos os registros locais de corridas serão apagados deste aparelho.</string>
+    <string name="dialog_confirm_clear">Apagar tudo</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="cd_delete_ride">Excluir corrida do histórico</string>
+    <string name="cd_history_icon">Ícone de histórico de corridas</string>
+
+    <!-- Fase 6: Onboarding em 3 telas, Notificação persistente e Polimento -->
+    <string name="cd_onboarding_button">Abrir tutorial de introdução</string>
+    <string name="cd_onboarding_illustration">Ilustração explicativa da etapa de introdução</string>
+    <string name="cd_notification_icon">Ícone de notificação de monitoramento</string>
+    <string name="cd_status_check">Indicador de etapa concluída</string>
+
+    <string name="action_skip_onboarding">Pular</string>
+    <string name="action_onboarding_back">Anterior</string>
+    <string name="action_onboarding_next">Próximo</string>
+    <string name="action_onboarding_finish">Começar a usar</string>
+    <string name="onboarding_step_indicator_format">Passo %1$d de 3</string>
+
+    <string name="onboarding_step1_title">Decida em segundos se a corrida vale a pena</string>
+    <string name="onboarding_step1_desc">O Rota Pro analisa ofertas da Uber, 99 e inDrive em tempo real considerando seu custo real por km e suas metas pessoais.</string>
+    <string name="onboarding_step1_bullet_1">Semáforo automático: Verde (Aceitar), Amarelo (Avaliar) e Vermelho (Recusar).</string>
+    <string name="onboarding_step1_bullet_2">Cálculo real com combustível, consumo, manutenção e depreciação do veículo.</string>
+    <string name="onboarding_step1_bullet_3">Privacidade total: tudo é processado localmente, sem envio para servidores externos.</string>
+
+    <string name="onboarding_step2_title">Ative a leitura automática (Acessibilidade)</string>
+    <string name="onboarding_step2_desc">Permite ler apenas o valor, distância e duração exibidos no card da corrida nos apps Uber, 99 e inDrive.</string>
+    <string name="onboarding_step2_status_ok">Leitura automática já está ativa</string>
+    <string name="onboarding_step2_status_pending">Ativação pendente nas configurações</string>
+    <string name="onboarding_step2_steps">Toque em "Abrir Acessibilidade" → "Apps instalados" → selecione "Rota Pro • Leitor de Corridas" e ative a chave.</string>
+
+    <string name="onboarding_step3_title">Ative o Card Flutuante (Overlay)</string>
+    <string name="onboarding_step3_desc">Exibe o semáforo com R$/km, R$/hora e lucro estimado diretamente por cima do app de corrida.</string>
+    <string name="onboarding_step3_status_ok">Permissão de sobreposição concedida</string>
+    <string name="onboarding_step3_status_pending">Permissão de sobreposição pendente</string>
+    <string name="onboarding_step3_notification_hint">No Android 13+, ative também as notificações para manter o indicador de serviço ativo.</string>
+    <string name="action_allow_notifications">Permitir notificações</string>
+
+    <string name="monitoring_notification_channel_name">Monitoramento ativo</string>
+    <string name="monitoring_notification_channel_desc">Indica que o leitor de ofertas do Rota Pro está ativo em segundo plano.</string>
+    <string name="monitoring_notification_title">Rota Pro • Monitoramento ativo</string>
+    <string name="monitoring_notification_text">Aguardando ofertas na Uber, 99 e inDrive. Dados 100% locais.</string>
+    <string name="monitoring_notification_action_history">Histórico</string>
+
+    <string name="notification_banner_title">Notificação de status desativada</string>
+    <string name="notification_banner_desc">Ative a permissão para ver o indicador persistente quando o monitoramento estiver ligado.</string>
+    <string name="msg_notifications_granted">Notificações ativadas com sucesso</string>
+    <string name="msg_notifications_denied">Você pode ativar as notificações depois nas configurações do aparelho.</string>
+    <string name="msg_fill_valid_ride_for_overlay">Corrija os campos inválidos para testar o card flutuante.</string>
+    <string name="msg_ride_deleted">Corrida removida do histórico</string>
+    <string name="msg_history_cleared">Histórico apagado deste dispositivo</string>
+    <string name="action_go_to_simulator">Ir para o simulador</string>
+    <string name="error_saving_settings">Não foi possível salvar as configurações neste momento. Tente novamente.</string>
+</resources>

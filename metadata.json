@@ -1,0 +1,6 @@
+{
+  "name": "Rota Pro",
+  "description": "Assistente inteligente para motoristas de aplicativo analisarem corridas em tempo real (R$/km, R$/h, custo real e lucro).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
