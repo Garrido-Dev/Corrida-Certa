@@ -143,6 +143,10 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnResetDefaults.setOnClickListener {
             viewModel.resetToDefaults()
         }
+
+        binding.btnOpenAbout.setOnClickListener {
+            startActivity(AboutActivity.createIntent(this))
+        }
     }
 
     private fun observeViewModel() {

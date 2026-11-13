@@ -20,6 +20,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.BuildConfig
 import com.example.R
 import com.example.data.HistoryRepository
 import com.example.data.SettingsRepository
@@ -101,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         applyEdgeToEdgeInsets()
+        binding.tvPhaseBadge.text = getString(R.string.phase_badge, BuildConfig.VERSION_NAME)
         setupListeners()
         observeUiState()
         handleOverlayIntentIfPresent(intent)
@@ -155,6 +157,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
+        binding.tvPhaseBadge.setOnClickListener {
+            startActivity(AboutActivity.createIntent(this))
+        }
         binding.btnOpenOnboarding.setOnClickListener {
             startActivity(OnboardingActivity.createIntent(this, launchMainOnFinish = false))
         }

@@ -1,7 +1,8 @@
 <resources>
-    <string name="app_name">Rota Pro</string>
+    <string name="app_name">Corrida Certa</string>
     <string name="app_subtitle">Decisão rápida para motoristas de app</string>
-    <string name="phase_badge">v1.0 • Rota Pro</string>
+    <string name="phase_badge">v%1$s</string>
+    <string name="cd_version_badge">Ver versão e informações sobre o Corrida Certa</string>
 
     <!-- Semáforo / Resultado -->
     <string name="verdict_idle_title">Aguardando dados</string>
@@ -96,23 +97,23 @@
     <string name="cd_accessibility_icon">Ícone do serviço de acessibilidade</string>
 
     <!-- Acessibilidade / Leitura Automática (Fase 3) -->
-    <string name="accessibility_service_label">Rota Pro • Leitor de Corridas</string>
+    <string name="accessibility_service_label">Corrida Certa • Leitor de Corridas</string>
     <string name="accessibility_service_description">Lê apenas cards de oferta de corrida nos apps Uber, 99 e inDrive localmente no seu aparelho para calcular R$/km, R$/h e lucro em tempo real. Nenhum dado é enviado para servidores externos.</string>
 
     <string name="accessibility_card_title">Leitura automática de corridas</string>
     <string name="accessibility_status_active">Serviço ativo (Uber, 99 e inDrive)</string>
     <string name="accessibility_status_inactive">Serviço desativado</string>
-    <string name="accessibility_status_active_desc">O Rota Pro está pronto para ler cards de oferta automaticamente.</string>
+    <string name="accessibility_status_active_desc">O Corrida Certa está pronto para ler cards de oferta automaticamente.</string>
     <string name="accessibility_status_inactive_desc">Ative a Acessibilidade para analisar ofertas na tela da Uber, 99 e inDrive.</string>
     <string name="action_open_accessibility_guide">Instruções de ativação</string>
 
     <string name="accessibility_guide_title">Ativar leitura automática</string>
     <string name="accessibility_guide_privacy_title">Privacidade garantida no aparelho</string>
-    <string name="accessibility_guide_privacy_desc">O Rota Pro monitora apenas Uber, 99 e inDrive localmente. Seus ganhos e trajetos nunca são registrados em logs nem enviados para fora do celular.</string>
+    <string name="accessibility_guide_privacy_desc">O Corrida Certa monitora apenas Uber, 99 e inDrive localmente. Seus ganhos e trajetos nunca são registrados em logs nem enviados para fora do celular.</string>
     <string name="accessibility_guide_steps_title">Passo a passo para ativar</string>
     <string name="accessibility_step_1">1. Toque no botão "Abrir Acessibilidade" abaixo.</string>
     <string name="accessibility_step_2">2. Acesse "Apps instalados" ou "Serviços transferidos".</string>
-    <string name="accessibility_step_3">3. Selecione "Rota Pro • Leitor de Corridas".</string>
+    <string name="accessibility_step_3">3. Selecione "Corrida Certa • Leitor de Corridas".</string>
     <string name="accessibility_step_4">4. Ative a chave principal e confirme a permissão.</string>
     <string name="action_open_android_accessibility">Abrir Acessibilidade</string>
     <string name="error_open_accessibility_settings">Não foi possível abrir as configurações de acessibilidade neste aparelho.</string>
@@ -134,14 +135,14 @@
     <string name="overlay_metric_profit">Lucro</string>
     <string name="overlay_hint_gestures">Toque para detalhes • Arraste • Deslize para fechar</string>
     <string name="overlay_details_format">Valor: %1$s • Trajeto: %2$.1f km (%3$.0f min)\nCusto real: %4$s • Líquido/km: %5$s</string>
-    <string name="overlay_action_open_app">Abrir no Rota Pro</string>
+    <string name="overlay_action_open_app">Abrir no Corrida Certa</string>
     <string name="overlay_app_simulation">Simulação</string>
     <string name="cd_overlay_close">Fechar card flutuante</string>
     <string name="cd_overlay_icon">Ícone do semáforo no overlay</string>
 
     <string name="overlay_notification_channel_name">Leitor de Corridas (Overlay)</string>
     <string name="overlay_notification_channel_desc">Mantém o card flutuante de decisão rápida disponível sobre os apps de transporte.</string>
-    <string name="overlay_notification_title">Rota Pro monitorando corridas</string>
+    <string name="overlay_notification_title">Corrida Certa monitorando corridas</string>
     <string name="overlay_notification_text">Card flutuante pronto para exibir análises em tempo real.</string>
 
     <!-- Histórico e Estatísticas (Fase 5) -->
@@ -191,7 +192,7 @@
     <string name="onboarding_step_indicator_format">Passo %1$d de 3</string>
 
     <string name="onboarding_step1_title">Decida em segundos se a corrida vale a pena</string>
-    <string name="onboarding_step1_desc">O Rota Pro analisa ofertas da Uber, 99 e inDrive em tempo real considerando seu custo real por km e suas metas pessoais.</string>
+    <string name="onboarding_step1_desc">O Corrida Certa analisa ofertas da Uber, 99 e inDrive em tempo real considerando seu custo real por km e suas metas pessoais.</string>
     <string name="onboarding_step1_bullet_1">Semáforo automático: Verde (Aceitar), Amarelo (Avaliar) e Vermelho (Recusar).</string>
     <string name="onboarding_step1_bullet_2">Cálculo real com combustível, consumo, manutenção e depreciação do veículo.</string>
     <string name="onboarding_step1_bullet_3">Privacidade total: tudo é processado localmente, sem envio para servidores externos.</string>
@@ -200,7 +201,7 @@
     <string name="onboarding_step2_desc">Permite ler apenas o valor, distância e duração exibidos no card da corrida nos apps Uber, 99 e inDrive.</string>
     <string name="onboarding_step2_status_ok">Leitura automática já está ativa</string>
     <string name="onboarding_step2_status_pending">Ativação pendente nas configurações</string>
-    <string name="onboarding_step2_steps">Toque em "Abrir Acessibilidade" → "Apps instalados" → selecione "Rota Pro • Leitor de Corridas" e ative a chave.</string>
+    <string name="onboarding_step2_steps">Toque em "Abrir Acessibilidade" → "Apps instalados" → selecione "Corrida Certa • Leitor de Corridas" e ative a chave.</string>
 
     <string name="onboarding_step3_title">Ative o Card Flutuante (Overlay)</string>
     <string name="onboarding_step3_desc">Exibe o semáforo com R$/km, R$/hora e lucro estimado diretamente por cima do app de corrida.</string>
@@ -210,8 +211,8 @@
     <string name="action_allow_notifications">Permitir notificações</string>
 
     <string name="monitoring_notification_channel_name">Monitoramento ativo</string>
-    <string name="monitoring_notification_channel_desc">Indica que o leitor de ofertas do Rota Pro está ativo em segundo plano.</string>
-    <string name="monitoring_notification_title">Rota Pro • Monitoramento ativo</string>
+    <string name="monitoring_notification_channel_desc">Indica que o leitor de ofertas do Corrida Certa está ativo em segundo plano.</string>
+    <string name="monitoring_notification_title">Corrida Certa • Monitoramento ativo</string>
     <string name="monitoring_notification_text">Aguardando ofertas na Uber, 99 e inDrive. Dados 100% locais.</string>
     <string name="monitoring_notification_action_history">Histórico</string>
 
@@ -224,4 +225,17 @@
     <string name="msg_history_cleared">Histórico apagado deste dispositivo</string>
     <string name="action_go_to_simulator">Ir para o simulador</string>
     <string name="error_saving_settings">Não foi possível salvar as configurações neste momento. Tente novamente.</string>
+
+    <!-- Tela Sobre (About) e Versionamento -->
+    <string name="about_screen_title">Sobre o Corrida Certa</string>
+    <string name="action_open_about">Sobre o aplicativo</string>
+    <string name="about_version_format">Versão %1$s (Build %2$d)</string>
+    <string name="cd_app_icon">Ícone do aplicativo Corrida Certa</string>
+    <string name="about_purpose_title">O que o app faz</string>
+    <string name="about_purpose_desc">O Corrida Certa analisa ofertas de corrida na Uber, 99 e inDrive direto na tela usando AccessibilityService e exibe um card flutuante com semáforo (Aceitar, Avaliar ou Recusar), R$/km, R$/hora, custo operacional real e lucro estimado.</string>
+    <string name="about_privacy_title">Privacidade e processamento local</string>
+    <string name="about_privacy_desc">Todos os cálculos, configurações (DataStore) e registros de histórico (Room) permanecem exclusivamente no seu dispositivo. O app não coleta, não registra em logs e não envia dados de corridas ou ganhos para servidores externos.</string>
+    <string name="about_tech_title">Especificações e versionamento</string>
+    <string name="about_tech_desc">• Package ID: %1$s\n• Plataformas lidas: Uber, 99 e inDrive\n• Arquitetura: MVVM + Motor puro em Kotlin\n• Persistência: DataStore Preferences e Room SQLite\n• Padrão de versão: Versionamento Semântico (MAJOR.MINOR.PATCH)</string>
+    <string name="action_reopen_tutorial">Rever tutorial (3 etapas)</string>
 </resources>

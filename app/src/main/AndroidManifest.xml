@@ -53,6 +53,12 @@
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/Theme.RotaPro" />
 
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.RotaPro" />
+
         <service
             android:name=".service.RideAccessibilityService"
             android:exported="true"

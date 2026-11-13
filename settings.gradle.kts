@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Rota Pro"
+rootProject.name = "Corrida Certa"
 
 include(":app")
