@@ -27,8 +27,11 @@ import com.example.model.RideVerdict
 import com.example.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -42,6 +45,8 @@ class OverlayService : Service() {
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "rota_pro_overlay_channel"
         private const val NOTIFICATION_ID = 4001
+        private const val AUTO_DISMISS_SECONDS = 15
+        private const val TIMER_TICK_MS = 250L
         const val ACTION_START_OR_UPDATE = "com.example.action.START_OR_UPDATE_OVERLAY"
         const val ACTION_HIDE = "com.example.action.HIDE_OVERLAY"
 
@@ -66,9 +71,11 @@ class OverlayService : Service() {
     private var layoutParams: WindowManager.LayoutParams? = null
     private var isViewAttached = false
     private var isDetailsExpanded = false
+    private var autoDismissJob: Job? = null
+    private var lastAlertedAtMillis: Long = 0L
 
     private val currencyFormat: NumberFormat by lazy {
-        NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
     }
 
     override fun onCreate() {
@@ -180,6 +187,16 @@ class OverlayService : Service() {
                 isViewAttached = false
             }
         }
+
+        if (isViewAttached) {
+            if (detected.detectedAtMillis != lastAlertedAtMillis) {
+                lastAlertedAtMillis = detected.detectedAtMillis
+                HapticFeedbackHelper.vibrateForVerdict(this, detected.analysis.verdict)
+            }
+            if (!isDetailsExpanded) {
+                startAutoDismissTimer(viewBinding)
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -273,15 +290,42 @@ class OverlayService : Service() {
         } else {
             View.GONE
         }
+        if (isDetailsExpanded) {
+            autoDismissJob?.cancel()
+            viewBinding.tvOverlayTimer.setText(R.string.overlay_timer_paused)
+            viewBinding.progressOverlayTimer.progress = 100
+        } else {
+            startAutoDismissTimer(viewBinding)
+        }
+    }
+
+    private fun startAutoDismissTimer(viewBinding: OverlayRideCardBinding) {
+        autoDismissJob?.cancel()
+        val totalMs = AUTO_DISMISS_SECONDS * 1000L
+        autoDismissJob = serviceScope.launch {
+            var remainingMs = totalMs
+            while (isActive && remainingMs > 0L) {
+                val secondsLeft = ((remainingMs + 999L) / 1000L).toInt().coerceAtLeast(1)
+                viewBinding.tvOverlayTimer.text = getString(R.string.overlay_timer_format, secondsLeft)
+                viewBinding.progressOverlayTimer.progress = ((remainingMs * 100L) / totalMs).toInt()
+                delay(TIMER_TICK_MS)
+                remainingMs -= TIMER_TICK_MS
+            }
+            if (isActive && isViewAttached && !isDetailsExpanded) {
+                dismissFromUserGesture()
+            }
+        }
     }
 
     private fun dismissFromUserGesture() {
+        autoDismissJob?.cancel()
         isDetailsExpanded = false
         removeOverlayView()
         RideMonitorState.clearDetectedRide()
     }
 
     private fun removeOverlayView() {
+        autoDismissJob?.cancel()
         val view = binding?.root
         if (view != null && isViewAttached) {
             try {
@@ -360,9 +404,11 @@ class OverlayService : Service() {
             viewBinding.tvOverlayLabelProfit,
             viewBinding.tvOverlayProfit,
             viewBinding.tvOverlayHint,
+            viewBinding.tvOverlayTimer,
             viewBinding.tvOverlayDetailsText
         )
         coloredTextViews.forEach { it.setTextColor(textColor) }
+        viewBinding.progressOverlayTimer.setIndicatorColor(accentColor)
     }
 
     private data class OverlayStyle(

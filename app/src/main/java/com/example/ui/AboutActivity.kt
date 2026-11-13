@@ -69,5 +69,8 @@ class AboutActivity : AppCompatActivity() {
         binding.btnAboutTutorial.setOnClickListener {
             startActivity(OnboardingActivity.createIntent(this, launchMainOnFinish = false))
         }
+        binding.btnAboutDiagnostic.setOnClickListener {
+            startActivity(DiagnosticActivity.createIntent(this))
+        }
     }
 }

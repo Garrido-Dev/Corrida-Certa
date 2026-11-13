@@ -91,6 +91,13 @@ class HistoryViewModelTest {
         assertEquals(50.0, viewModel.uiState.value.statistics.acceptanceRatePercent, 0.001)
         assertEquals(25.0, viewModel.uiState.value.statistics.timeSavedMinutes, 0.001)
 
+        // Filtra apenas corridas da 99 (1 corrida recusada -> 0% aceite)
+        viewModel.selectAppFilter(HistoryAppFilter.APP_99)
+        assertEquals(HistoryAppFilter.APP_99, viewModel.uiState.value.appFilter)
+        assertEquals(1, viewModel.uiState.value.rides.size)
+        assertEquals("99", viewModel.uiState.value.rides.first().appName)
+        assertEquals(0.0, viewModel.uiState.value.statistics.acceptanceRatePercent, 0.001)
+
         collectJob.cancel()
     }
 }

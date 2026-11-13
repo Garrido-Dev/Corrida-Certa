@@ -18,7 +18,19 @@ data class DetectedRideAnalysis(
 )
 
 /**
- * Barramento reativo em memória entre o [RideAccessibilityService], a UI e o futuro OverlayService.
+ * Resumo volátil da última inspeção de tela feita pelo serviço de acessibilidade,
+ * usado na tela de Diagnóstico sem salvar textos brutos no aparelho.
+ */
+data class DiagnosticCaptureStatus(
+    val packageName: String,
+    val app: SupportedApp?,
+    val parsedSuccessfully: Boolean,
+    val summary: String? = null,
+    val updatedAtMillis: Long = System.currentTimeMillis()
+)
+
+/**
+ * Barramento reativo em memória entre o [RideAccessibilityService], a UI e o [OverlayService].
  * Todos os dados permanecem estritamente em memória no dispositivo.
  */
 object RideMonitorState {
@@ -29,6 +41,9 @@ object RideMonitorState {
     private val _detectedRide = MutableStateFlow<DetectedRideAnalysis?>(null)
     val detectedRide: StateFlow<DetectedRideAnalysis?> = _detectedRide.asStateFlow()
 
+    private val _diagnosticStatus = MutableStateFlow<DiagnosticCaptureStatus?>(null)
+    val diagnosticStatus: StateFlow<DiagnosticCaptureStatus?> = _diagnosticStatus.asStateFlow()
+
     fun setServiceConnected(connected: Boolean) {
         _isServiceConnected.value = connected
         if (!connected) {
@@ -38,6 +53,10 @@ object RideMonitorState {
 
     fun updateDetectedRide(detected: DetectedRideAnalysis) {
         _detectedRide.value = detected
+    }
+
+    fun updateDiagnosticStatus(status: DiagnosticCaptureStatus) {
+        _diagnosticStatus.value = status
     }
 
     fun clearDetectedRide() {

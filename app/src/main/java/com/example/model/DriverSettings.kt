@@ -9,6 +9,7 @@ package com.example.model
  * @property depreciation Custo médio de depreciação do veículo por km (R$/km).
  * @property targetPerKm Meta mínima de ganho bruto por km (R$/km).
  * @property targetPerHour Meta mínima de ganho bruto por hora (R$/h).
+ * @property dailyGoal Meta diária de lucro líquido (R$/dia).
  */
 data class DriverSettings(
     val fuelPrice: Double = 5.89,
@@ -16,7 +17,8 @@ data class DriverSettings(
     val maintenance: Double = 0.15,
     val depreciation: Double = 0.20,
     val targetPerKm: Double = 2.00,
-    val targetPerHour: Double = 50.00
+    val targetPerHour: Double = 50.00,
+    val dailyGoal: Double = 250.00
 ) {
     /**
      * Custo operacional real por km rodado.

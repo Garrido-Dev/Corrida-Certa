@@ -1,6 +1,7 @@
 package com.example.ui
 
 import androidx.annotation.StringRes
+import com.example.engine.DailyGoalProgress
 import com.example.model.DriverSettings
 import com.example.model.RideAnalysis
 
@@ -18,18 +19,19 @@ enum class RidePreset {
  * Erros de validação por campo do formulário da oferta de corrida.
  */
 data class FormFieldErrors(
-    @StringRes val fareError: Int? = null,
-    @StringRes val pickupKmError: Int? = null,
-    @StringRes val pickupMinError: Int? = null,
-    @StringRes val tripKmError: Int? = null,
-    @StringRes val tripMinError: Int? = null
+    @param:StringRes val fareError: Int? = null,
+    @param:StringRes val pickupKmError: Int? = null,
+    @param:StringRes val pickupMinError: Int? = null,
+    @param:StringRes val tripKmError: Int? = null,
+    @param:StringRes val tripMinError: Int? = null
 )
 
 /**
- * Estado imutável da tela principal com configurações persistidas pelo DataStore.
+ * Estado imutável da tela principal com configurações persistidas pelo DataStore e meta diária.
  */
 data class MainUiState(
     val settings: DriverSettings = DriverSettings(),
     val analysis: RideAnalysis? = null,
-    val fieldErrors: FormFieldErrors = FormFieldErrors()
+    val fieldErrors: FormFieldErrors = FormFieldErrors(),
+    val dailyGoalProgress: DailyGoalProgress = DailyGoalProgress()
 )

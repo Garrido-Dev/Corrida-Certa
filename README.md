@@ -72,13 +72,15 @@ Os textos capturados passam por `RideParserRegistry`, que escolhe o parser pelo 
 - **Onboarding (`OnboardingActivity`)**: apresentação em 3 etapas na primeira abertura (ou reaberta pela tela Sobre).
 - **Tela principal (`MainActivity`)**:
   - Card do semáforo com resultado detalhado (R$/km, R$/h, custo e lucro).
-  - Barra de status das permissões de **Sobreposição** e **Acessibilidade**, além do controle rápido de **Modo Automático** (pausa/retoma o overlay mantendo o app pronto).
+  - Card de progresso da **Meta diária de lucro** calculada sobre as corridas viáveis de hoje.
+  - Barra de status das permissões de **Sobreposição** e **Acessibilidade**, além do teste rápido do card flutuante (que fecha automaticamente após 15 segundos e vibra discretamente em ofertas verdes).
   - Formulário manual (valor, distância/tempo até o embarque e distância/tempo da viagem).
   - Acesso direto ao **Histórico**, **Configurações** e **Sobre** (tocando no selo de versão no topo).
-- **Configurações (`SettingsActivity`)**: ajuste de combustível, consumo, manutenção, depreciação, metas e atalho para **Sobre o aplicativo**.
-- **Guia de Acessibilidade (`AccessibilityGuideActivity`)**: passo a passo objetivo para habilitar o serviço nas configurações do Android.
-- **Histórico (`HistoryActivity`)**: lista de corridas analisadas com filtro/resumo de totais (quantidade por veredito, faturamento bruto e lucro estimado).
-- **Sobre (`AboutActivity`)**: exibe versão e build (`BuildConfig.VERSION_NAME` / `VERSION_CODE`), `applicationId`, resumo de privacidade offline e botão para rever o tutorial.
+- **Configurações (`SettingsActivity`)**: ajuste de combustível, consumo, manutenção, depreciação, metas (`R$/km`, `R$/h` e meta diária em `R$`) e atalho para **Sobre o aplicativo**.
+- **Guia de Acessibilidade (`AccessibilityGuideActivity`)**: passo a passo objetivo para habilitar o serviço nas configurações do Android e acesso ao **Diagnóstico de leitura**.
+- **Histórico (`HistoryActivity`)**: lista de corridas analisadas com filtro por período (`Hoje`, `7 dias`, `30 dias`) e por aplicativo (`Todos`, `Uber`, `99`, `inDrive`, `Simulador`), progresso da meta diária e resumo de totais.
+- **Diagnóstico (`DiagnosticActivity`)**: exibe o status volátil da última leitura em memória e permite colar ou simular textos de ofertas para validar os parsers offline.
+- **Sobre (`AboutActivity`)**: exibe versão e build (`BuildConfig.VERSION_NAME` / `VERSION_CODE`), `applicationId`, resumo de privacidade offline e atalhos para tutorial e diagnóstico.
 
 ---
 
@@ -93,7 +95,9 @@ com/example/
 │   ├── SettingsRepository.kt         # DataStore Preferences para metas e custos
 │   └── local/                        # Room Database, DAO, Entity e estatísticas
 ├── engine/
-│   └── RideAnalyzer.kt               # Regras puras do semáforo e métricas financeiras
+│   ├── RideAnalyzer.kt               # Regras puras do semáforo e métricas financeiras
+│   ├── RideStatisticsCalculator.kt   # Agregados do histórico por período e app
+│   └── DailyGoalCalculator.kt        # Cálculo de progresso da meta diária
 ├── model/
 │   ├── DriverSettings.kt             # Custos do veículo e metas do motorista
 │   ├── RideOffer.kt                  # Dados de entrada da oferta
@@ -108,8 +112,9 @@ com/example/
 │   └── InDriveParser.kt
 ├── service/
 │   ├── RideAccessibilityService.kt   # Escuta janelas dos apps de corrida
-│   ├── OverlayService.kt             # Card flutuante via WindowManager (Foreground Service)
+│   ├── OverlayService.kt             # Card flutuante via WindowManager (timer 15s + Foreground Service)
 │   ├── OverlayGestureHandler.kt      # Arraste e toque do card flutuante
+│   ├── HapticFeedbackHelper.kt       # Vibração curta em ofertas verdes (ACCEPT)
 │   ├── MonitoringNotificationHelper.kt
 │   ├── AccessibilityStatusHelper.kt
 │   ├── OverlayPermissionHelper.kt
@@ -118,6 +123,7 @@ com/example/
     ├── MainActivity.kt / MainViewModel.kt / MainUiState.kt
     ├── SettingsActivity.kt / SettingsViewModel.kt / SettingsUiState.kt
     ├── HistoryActivity.kt / HistoryViewModel.kt / HistoryUiState.kt / HistoryRideAdapter.kt
+    ├── DiagnosticActivity.kt
     ├── OnboardingActivity.kt
     ├── AccessibilityGuideActivity.kt
     └── AboutActivity.kt
@@ -143,6 +149,7 @@ Declaradas em `app/src/main/AndroidManifest.xml`:
 - `SYSTEM_ALERT_WINDOW`: necessária para desenhar o card flutuante por cima dos aplicativos de corrida.
 - `FOREGROUND_SERVICE` e `FOREGROUND_SERVICE_SPECIAL_USE`: mantém o serviço de overlay ativo com notificação visível enquanto o monitoramento está ligado.
 - `POST_NOTIFICATIONS`: exibe a notificação persistente no Android 13+ com botões rápidos de pausa/retomada.
+- `VIBRATE`: permissão normal usada para emitir alerta tátil discreto quando uma corrida verde (`ACCEPT`) aparece no overlay.
 - `BIND_ACCESSIBILITY_SERVICE`: vinculada exclusivamente ao `RideAccessibilityService`, restrita aos pacotes de Uber, 99 e inDrive.
 
 O app **não solicita** internet, localização em segundo plano, câmera ou acesso a arquivos de mídia.
@@ -177,12 +184,12 @@ Os testes de lógica, banco Room e interface (Espresso sobre Robolectric) rodam 
 ```
 
 Cobertura atual em `app/src/test/java/com/example/`:
-- `engine/RideAnalyzerTest.kt`: fórmulas de lucro, custo/km e transições do semáforo.
+- `engine/RideAnalyzerTest.kt` e `DailyGoalCalculatorTest.kt`: fórmulas de lucro, custo/km, transições do semáforo e meta diária.
 - `parser/*Test.kt`: extração de ofertas da Uber, 99, inDrive e roteamento no registro.
 - `data/local/RotaProDatabaseTest.kt` e `RideStatisticsCalculatorTest.kt`: persistência Room e agregados.
 - `service/MonitoringNotificationHelperTest.kt`: canal e ações da notificação persistente.
 - `ui/MainActivityTest.kt`: validação Espresso do formulário manual e cálculo na tela.
-- `ui/MainAndHistoryRobolectricTest.kt`, `OnboardingActivityTest.kt` e `AboutActivityTest.kt`: fluxos de tela, histórico e versão dinâmica.
+- `ui/MainAndHistoryRobolectricTest.kt`, `OnboardingActivityTest.kt`, `AboutActivityTest.kt` e `DiagnosticActivityTest.kt`: fluxos de tela, histórico, versão dinâmica e diagnóstico offline.
 
 ---
 
@@ -192,8 +199,8 @@ O workflow `.github/workflows/build-apk.yml` executa automaticamente a cada `pus
 
 1. Faz checkout do repositório e configura **JDK 17 (Temurin)** com cache do Gradle.
 2. Restaura `debug.keystore` a partir de `debug.keystore.base64` (com fallback via `keytool` caso necessário).
-3. Executa `./gradlew assembleDebug`.
-4. Publica `app-debug.apk` como artefato do workflow (`app-debug`).
+3. Executa `./gradlew testDebugUnitTest` para garantir que toda a suíte de testes passe antes do empacotamento.
+4. Executa `./gradlew assembleDebug` e publica `app-debug.apk` como artefato do workflow (`app-debug`).
 
 O plugin `com.google.gms.google-services` está comentado em `app/build.gradle.kts` porque o aplicativo não usa serviços do Firebase nem depende de `google-services.json` para compilar.
 

@@ -86,12 +86,34 @@ class RideAccessibilityService : AccessibilityService() {
         parseJob?.cancel()
         parseJob = serviceScope.launch {
             delay(DEBOUNCE_MS)
+            val app = SupportedApp.fromPackageName(packageName)
             val parsed = parserRegistry.parse(packageName, extractedTexts)
             if (parsed == null) {
+                RideMonitorState.updateDiagnosticStatus(
+                    DiagnosticCaptureStatus(
+                        packageName = packageName,
+                        app = app,
+                        parsedSuccessfully = false
+                    )
+                )
                 // Fallback seguro: se não conseguir parsear com confiança, não exibe nada
                 RideMonitorState.clearDetectedRide()
             } else {
                 val analysis = rideAnalyzer.analyze(parsed.offer, currentSettings)
+                RideMonitorState.updateDiagnosticStatus(
+                    DiagnosticCaptureStatus(
+                        packageName = packageName,
+                        app = parsed.app,
+                        parsedSuccessfully = true,
+                        summary = String.format(
+                            java.util.Locale.forLanguageTag("pt-BR"),
+                            "R$ %.2f • %.1f km • %.0f min",
+                            parsed.offer.fare,
+                            analysis.totalKm,
+                            analysis.totalMin
+                        )
+                    )
+                )
                 RideMonitorState.updateDetectedRide(
                     DetectedRideAnalysis(
                         app = parsed.app,

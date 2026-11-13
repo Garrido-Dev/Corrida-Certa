@@ -107,6 +107,64 @@
                     android:text="@string/history_filter_30_days" />
             </com.google.android.material.chip.ChipGroup>
 
+            <!-- Filtros por aplicativo / origem -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupAppFilter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:checkedChip="@id/chipFilterAppAll"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFilterAppAll"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/history_filter_app_all" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFilterAppUber"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/history_filter_app_uber" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFilterApp99"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/history_filter_app_99" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFilterAppInDrive"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/history_filter_app_indrive" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFilterAppSimulator"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/history_filter_app_simulator" />
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+
             <!-- Lista de Histórico -->
             <FrameLayout
                 android:id="@+id/containerHistoryList"
@@ -181,6 +239,70 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingBottom="24dp">
+
+                    <!-- Progresso da Meta Diária -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardHistoryDailyGoal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:cardBackgroundColor="@color/md_theme_surface"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/md_theme_outlineVariant"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/daily_goal_card_title"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                                    android:textColor="@color/md_theme_onSurface"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvHistoryDailyGoalProgress"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                                    android:textColor="@color/md_theme_secondary"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <com.google.android.material.progressindicator.LinearProgressIndicator
+                                android:id="@+id/progressHistoryDailyGoal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:max="100"
+                                android:progress="0"
+                                app:indicatorColor="@color/md_theme_secondary"
+                                app:trackColor="@color/md_theme_surfaceVariant"
+                                app:trackCornerRadius="6dp"
+                                app:trackThickness="8dp" />
+
+                            <TextView
+                                android:id="@+id/tvHistoryDailyGoalSubtitle"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                                android:textColor="@color/md_theme_onSurfaceVariant" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Linha 1 KPIs: Taxa de aceite e R$/km médio -->
                     <LinearLayout

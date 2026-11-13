@@ -35,6 +35,7 @@ class SettingsRepository(
         val DEPRECIATION = doublePreferencesKey("depreciation")
         val TARGET_PER_KM = doublePreferencesKey("target_per_km")
         val TARGET_PER_HOUR = doublePreferencesKey("target_per_hour")
+        val DAILY_GOAL = doublePreferencesKey("daily_goal")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
@@ -57,7 +58,8 @@ class SettingsRepository(
                 maintenance = preferences[Keys.MAINTENANCE] ?: defaults.maintenance,
                 depreciation = preferences[Keys.DEPRECIATION] ?: defaults.depreciation,
                 targetPerKm = preferences[Keys.TARGET_PER_KM] ?: defaults.targetPerKm,
-                targetPerHour = preferences[Keys.TARGET_PER_HOUR] ?: defaults.targetPerHour
+                targetPerHour = preferences[Keys.TARGET_PER_HOUR] ?: defaults.targetPerHour,
+                dailyGoal = preferences[Keys.DAILY_GOAL] ?: defaults.dailyGoal
             )
         }
 
@@ -72,6 +74,7 @@ class SettingsRepository(
             preferences[Keys.DEPRECIATION] = settings.depreciation
             preferences[Keys.TARGET_PER_KM] = settings.targetPerKm
             preferences[Keys.TARGET_PER_HOUR] = settings.targetPerHour
+            preferences[Keys.DAILY_GOAL] = settings.dailyGoal
         }
     }
 

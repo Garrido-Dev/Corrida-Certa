@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val currencyFormat: NumberFormat by lazy {
-        NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -321,6 +321,7 @@ class MainActivity : AppCompatActivity() {
                             currencyFormat.format(state.settings.targetPerKm),
                             currencyFormat.format(state.settings.targetPerHour)
                         )
+                        renderDailyGoal(state.dailyGoalProgress)
                         renderFieldErrors(state.fieldErrors)
                         renderAnalysis(state.analysis)
                     }
@@ -367,6 +368,31 @@ class MainActivity : AppCompatActivity() {
         binding.tvMainOverlayStatus.setText(
             if (granted) R.string.overlay_status_granted else R.string.overlay_status_denied
         )
+    }
+
+    private fun renderDailyGoal(progress: com.example.engine.DailyGoalProgress) {
+        binding.tvDailyGoalProgress.text = getString(
+            R.string.daily_goal_progress_format,
+            currencyFormat.format(progress.todayProfit),
+            currencyFormat.format(progress.dailyGoal),
+            progress.progressPercent
+        )
+        binding.progressDailyGoal.progress = progress.progressPercent
+        val indicatorColor = ContextCompat.getColor(
+            this,
+            if (progress.isGoalReached) R.color.verdict_accept_accent else R.color.md_theme_secondary
+        )
+        binding.progressDailyGoal.setIndicatorColor(indicatorColor)
+        binding.tvDailyGoalProgress.setTextColor(indicatorColor)
+
+        binding.tvDailyGoalSubtitle.text = if (progress.isGoalReached) {
+            getString(R.string.daily_goal_reached)
+        } else {
+            getString(
+                R.string.daily_goal_remaining_format,
+                currencyFormat.format(progress.remainingAmount)
+            )
+        }
     }
 
     private fun renderFieldErrors(errors: FormFieldErrors) {

@@ -15,19 +15,20 @@ enum class SettingsSection {
  * Erros de validação específicos dos campos de configuração.
  */
 data class SettingsFieldErrors(
-    @StringRes val fuelPriceError: Int? = null,
-    @StringRes val consumptionError: Int? = null,
-    @StringRes val maintenanceError: Int? = null,
-    @StringRes val depreciationError: Int? = null,
-    @StringRes val targetPerKmError: Int? = null,
-    @StringRes val targetPerHourError: Int? = null
+    @param:StringRes val fuelPriceError: Int? = null,
+    @param:StringRes val consumptionError: Int? = null,
+    @param:StringRes val maintenanceError: Int? = null,
+    @param:StringRes val depreciationError: Int? = null,
+    @param:StringRes val targetPerKmError: Int? = null,
+    @param:StringRes val targetPerHourError: Int? = null,
+    @param:StringRes val dailyGoalError: Int? = null
 ) {
     val hasVehicleError: Boolean
         get() = fuelPriceError != null || consumptionError != null ||
             maintenanceError != null || depreciationError != null
 
     val hasGoalsError: Boolean
-        get() = targetPerKmError != null || targetPerHourError != null
+        get() = targetPerKmError != null || targetPerHourError != null || dailyGoalError != null
 
     val hasAnyError: Boolean
         get() = hasVehicleError || hasGoalsError

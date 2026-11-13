@@ -64,7 +64,8 @@ class SettingsViewModel(
         maintenanceText: String,
         depreciationText: String,
         targetPerKmText: String,
-        targetPerHourText: String
+        targetPerHourText: String,
+        dailyGoalText: String? = null
     ) {
         val current = _uiState.value.previewSettings
         val updated = DriverSettings(
@@ -73,7 +74,8 @@ class SettingsViewModel(
             maintenance = parseBrazilianDouble(maintenanceText) ?: current.maintenance,
             depreciation = parseBrazilianDouble(depreciationText) ?: current.depreciation,
             targetPerKm = parseBrazilianDouble(targetPerKmText) ?: current.targetPerKm,
-            targetPerHour = parseBrazilianDouble(targetPerHourText) ?: current.targetPerHour
+            targetPerHour = parseBrazilianDouble(targetPerHourText) ?: current.targetPerHour,
+            dailyGoal = dailyGoalText?.let(::parseBrazilianDouble) ?: current.dailyGoal
         )
         _uiState.update { it.copy(previewSettings = updated) }
     }
@@ -87,7 +89,8 @@ class SettingsViewModel(
         maintenanceText: String,
         depreciationText: String,
         targetPerKmText: String,
-        targetPerHourText: String
+        targetPerHourText: String,
+        dailyGoalText: String? = null
     ) {
         val fuelPrice = parseBrazilianDouble(fuelPriceText)
         val consumption = parseBrazilianDouble(consumptionText)
@@ -95,6 +98,11 @@ class SettingsViewModel(
         val depreciation = parseBrazilianDouble(depreciationText)
         val targetPerKm = parseBrazilianDouble(targetPerKmText)
         val targetPerHour = parseBrazilianDouble(targetPerHourText)
+        val dailyGoal = if (dailyGoalText == null) {
+            _uiState.value.previewSettings.dailyGoal
+        } else {
+            parseBrazilianDouble(dailyGoalText)
+        }
 
         val errors = SettingsFieldErrors(
             fuelPriceError = when {
@@ -126,6 +134,11 @@ class SettingsViewModel(
                 targetPerHour == null -> R.string.error_invalid_number
                 targetPerHour <= 0.0 -> R.string.error_must_be_positive
                 else -> null
+            },
+            dailyGoalError = when {
+                dailyGoal == null -> R.string.error_invalid_number
+                dailyGoal <= 0.0 -> R.string.error_must_be_positive
+                else -> null
             }
         )
 
@@ -154,7 +167,8 @@ class SettingsViewModel(
             maintenance = maintenance!!,
             depreciation = depreciation!!,
             targetPerKm = targetPerKm!!,
-            targetPerHour = targetPerHour!!
+            targetPerHour = targetPerHour!!,
+            dailyGoal = dailyGoal!!
         )
 
         viewModelScope.launch {

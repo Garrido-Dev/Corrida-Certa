@@ -46,6 +46,9 @@ class AccessibilityGuideActivity : AppCompatActivity() {
         binding.btnOpenAndroidAccessibility.setOnClickListener {
             openSystemAccessibilitySettings()
         }
+        binding.btnOpenDiagnostic.setOnClickListener {
+            startActivity(DiagnosticActivity.createIntent(this))
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

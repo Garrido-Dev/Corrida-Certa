@@ -22,8 +22,8 @@ class HistoryRideAdapter(
     private val onDeleteClick: (RotaProRide) -> Unit
 ) : ListAdapter<RotaProRide, HistoryRideAdapter.RideViewHolder>(DiffCallback) {
 
-    private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
-    private val dateFormat = SimpleDateFormat("dd/MM HH:mm", Locale("pt", "BR"))
+    private val currencyFormat = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
+    private val dateFormat = SimpleDateFormat("dd/MM HH:mm", Locale.forLanguageTag("pt-BR"))
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RideViewHolder {
         val binding = ItemHistoryRideBinding.inflate(

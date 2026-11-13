@@ -4,24 +4,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.R
+import com.example.data.HistoryPeriodFilter
 import com.example.data.HistoryRepository
 import com.example.data.SettingsRepository
+import com.example.engine.DailyGoalCalculator
 import com.example.engine.RideAnalyzer
 import com.example.model.RideOffer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel principal que observa as configurações persistidas no [SettingsRepository]
- * e executa o motor [RideAnalyzer] para ofertas manuais.
+ * e executa o motor [RideAnalyzer] para ofertas manuais e acompanhamento da meta diária.
  */
 class MainViewModel(
     private val settingsRepository: SettingsRepository,
     private val historyRepository: HistoryRepository? = null,
-    private val analyzer: RideAnalyzer = RideAnalyzer()
+    private val analyzer: RideAnalyzer = RideAnalyzer(),
+    private val dailyGoalCalculator: DailyGoalCalculator = DailyGoalCalculator()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -30,16 +35,26 @@ class MainViewModel(
     private var lastOffer: RideOffer? = null
 
     init {
-        // Atualiza automaticamente as métricas se o motorista alterar custos ou metas na tela de Configurações
+        val todayRidesFlow = historyRepository?.observeRides(HistoryPeriodFilter.TODAY)
+            ?: flowOf(emptyList())
+
+        // Atualiza automaticamente métricas e progresso da meta diária quando configurações ou histórico mudam
         viewModelScope.launch {
-            settingsRepository.settingsFlow.collect { updatedSettings ->
+            combine(
+                settingsRepository.settingsFlow,
+                todayRidesFlow
+            ) { updatedSettings, todayRides ->
+                updatedSettings to todayRides
+            }.collect { (updatedSettings, todayRides) ->
+                val goalProgress = dailyGoalCalculator.calculate(todayRides, updatedSettings.dailyGoal)
                 _uiState.update { current ->
                     val recalculated = lastOffer?.let { offer ->
                         analyzer.analyze(offer, updatedSettings)
                     }
                     current.copy(
                         settings = updatedSettings,
-                        analysis = recalculated ?: current.analysis
+                        analysis = recalculated ?: current.analysis,
+                        dailyGoalProgress = goalProgress
                     )
                 }
             }

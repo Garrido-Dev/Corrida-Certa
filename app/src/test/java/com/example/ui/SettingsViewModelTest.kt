@@ -108,4 +108,26 @@ class SettingsViewModelTest {
         assertNotNull(viewModel.uiState.value.fieldErrors.targetPerKmError)
         coVerify(exactly = 0) { mockRepo.saveSettings(any()) }
     }
+
+    @Test
+    fun `saveSettings valida e persiste meta diaria positiva`() = runTest {
+        val mockRepo = mockk<SettingsRepository>()
+        every { mockRepo.settingsFlow } returns flowOf(DriverSettings())
+        coEvery { mockRepo.saveSettings(any()) } just runs
+
+        val viewModel = SettingsViewModel(mockRepo)
+        viewModel.saveSettings(
+            fuelPriceText = "5,89",
+            consumptionText = "10,0",
+            maintenanceText = "0,15",
+            depreciationText = "0,20",
+            targetPerKmText = "2,00",
+            targetPerHourText = "50,00",
+            dailyGoalText = "320,00"
+        )
+
+        coVerify(exactly = 1) {
+            mockRepo.saveSettings(match { it.dailyGoal == 320.0 })
+        }
+    }
 }

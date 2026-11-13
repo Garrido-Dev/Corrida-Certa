@@ -238,4 +238,38 @@
     <string name="about_tech_title">Especificações e versionamento</string>
     <string name="about_tech_desc">• Package ID: %1$s\n• Plataformas lidas: Uber, 99 e inDrive\n• Arquitetura: MVVM + Motor puro em Kotlin\n• Persistência: DataStore Preferences e Room SQLite\n• Padrão de versão: Versionamento Semântico (MAJOR.MINOR.PATCH)</string>
     <string name="action_reopen_tutorial">Rever tutorial (3 etapas)</string>
+
+    <!-- v1.1.0: Overlay Timer 15s, Meta Diária, Filtro por App e Diagnóstico -->
+    <string name="overlay_timer_format">Fecha em %1$ds</string>
+    <string name="overlay_timer_paused">Pausado enquanto detalhes abertos</string>
+
+    <string name="hint_daily_goal">Meta diária de lucro (R$)</string>
+    <string name="helper_daily_goal">Quanto você deseja lucrar líquido por dia</string>
+    <string name="daily_goal_card_title">Meta de lucro de hoje</string>
+    <string name="daily_goal_progress_format">%1$s de %2$s (%3$d%%)</string>
+    <string name="daily_goal_remaining_format">Faltam %1$s para bater a meta de hoje</string>
+    <string name="daily_goal_reached">Meta diária atingida! Parabéns.</string>
+
+    <string name="history_filter_app_all">Todos</string>
+    <string name="history_filter_app_uber">Uber</string>
+    <string name="history_filter_app_99">99</string>
+    <string name="history_filter_app_indrive">inDrive</string>
+    <string name="history_filter_app_simulator">Simulador</string>
+
+    <string name="diagnostic_screen_title">Diagnóstico de leitura</string>
+    <string name="action_open_diagnostic">Testar leitura de ofertas</string>
+    <string name="diagnostic_live_status_title">Última leitura do serviço</string>
+    <string name="diagnostic_live_status_empty">Nenhuma tela de app de corrida inspecionada nesta sessão ainda.</string>
+    <string name="diagnostic_live_status_format">App: %1$s (%2$s)\nStatus: %3$s • %4$s</string>
+    <string name="diagnostic_live_ok">Oferta reconhecida</string>
+    <string name="diagnostic_live_miss">Tela sem card de oferta válido</string>
+    <string name="diagnostic_sandbox_title">Simulador de texto da tela</string>
+    <string name="diagnostic_sandbox_desc">Cole abaixo o texto capturado de um card da Uber, 99 ou inDrive (ou carregue um exemplo) para validar o que o leitor extrai.</string>
+    <string name="diagnostic_load_sample">Carregar exemplo</string>
+    <string name="diagnostic_input_hint">Cole cada linha de texto do card da corrida...</string>
+    <string name="diagnostic_run_test">Testar leitura</string>
+    <string name="diagnostic_clear">Limpar</string>
+    <string name="diagnostic_result_empty">Informe ou carregue um texto de oferta para inspecionar a extração.</string>
+    <string name="diagnostic_result_failed">Nenhuma oferta válida reconhecida para %1$s. Confira se o texto contém valor em R$, distância (km/m) e tempo (min).</string>
+    <string name="diagnostic_result_success_format">App: %1$s • Veredito: %2$s\nValor: %3$s\nBusca: %4$.1f km (%5$.0f min)\nViagem: %6$.1f km (%7$.0f min)\nMétricas: %8$s/km • %9$s/h • Lucro: %10$s</string>
 </resources>

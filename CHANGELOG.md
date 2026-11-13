@@ -2,6 +2,18 @@
 
 Todas as mudanças relevantes deste projeto são documentadas neste arquivo seguindo o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o padrão [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-11-13
+
+### Adicionado
+- **Timer de 15s e alerta háptico no card flutuante (`OverlayService` + `HapticFeedbackHelper`)**: o card flutuante exibe barra de contagem regressiva de 15 segundos e fecha automaticamente ao terminar (pausando quando o motorista expande os detalhes). Corridas classificadas como **Aceitar (Verde)** disparam vibração discreta (`VIBRATE`).
+- **Meta diária de lucro (`DailyGoalCalculator`)**: novo campo configurável de meta diária (padrão `R$ 250,00`) na aba Metas, com barra de progresso na tela inicial e no painel de Estatísticas.
+- **Filtro por aplicativo no Histórico (`HistoryAppFilter`)**: chips para filtrar corridas e estatísticas por `Todos`, `Uber`, `99`, `inDrive` ou `Simulador`.
+- **Tela de Diagnóstico (`DiagnosticActivity`)**: ambiente offline para acompanhar o status da última leitura do serviço de acessibilidade em memória e testar textos de ofertas para Uber, 99 e inDrive.
+- **Testes automatizados no CI**: etapa `./gradlew testDebugUnitTest` integrada ao workflow `.github/workflows/build-apk.yml`.
+
+### Corrigido
+- Eliminados os avisos de depreciação de `Locale` (migrado para `Locale.forLanguageTag("pt-BR")`) e anotações `@param:StringRes` (`KT-73255`) nos estados imutáveis de UI.
+
 ## [1.0.0] - 2026-11-12
 
 ### Adicionado

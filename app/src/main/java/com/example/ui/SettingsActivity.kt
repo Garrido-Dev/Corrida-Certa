@@ -56,7 +56,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private val currencyFormat: NumberFormat by lazy {
-        NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
     }
 
     private var hasPopulatedInitialInputs = false
@@ -117,7 +117,8 @@ class SettingsActivity : AppCompatActivity() {
                     maintenanceText = binding.etMaintenance.text?.toString().orEmpty(),
                     depreciationText = binding.etDepreciation.text?.toString().orEmpty(),
                     targetPerKmText = binding.etTargetPerKm.text?.toString().orEmpty(),
-                    targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty()
+                    targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty(),
+                    dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty()
                 )
             }
         }
@@ -128,6 +129,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.etDepreciation.doAfterTextChanged { inputWatcher() }
         binding.etTargetPerKm.doAfterTextChanged { inputWatcher() }
         binding.etTargetPerHour.doAfterTextChanged { inputWatcher() }
+        binding.etDailyGoal.doAfterTextChanged { inputWatcher() }
 
         binding.btnSaveSettings.setOnClickListener {
             viewModel.saveSettings(
@@ -136,7 +138,8 @@ class SettingsActivity : AppCompatActivity() {
                 maintenanceText = binding.etMaintenance.text?.toString().orEmpty(),
                 depreciationText = binding.etDepreciation.text?.toString().orEmpty(),
                 targetPerKmText = binding.etTargetPerKm.text?.toString().orEmpty(),
-                targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty()
+                targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty(),
+                dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty()
             )
         }
 
@@ -207,6 +210,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.etDepreciation.setText(String.format(Locale.US, "%.2f", settings.depreciation))
         binding.etTargetPerKm.setText(String.format(Locale.US, "%.2f", settings.targetPerKm))
         binding.etTargetPerHour.setText(String.format(Locale.US, "%.2f", settings.targetPerHour))
+        binding.etDailyGoal.setText(String.format(Locale.US, "%.2f", settings.dailyGoal))
         isUpdatingFieldsProgrammatically = false
     }
 
@@ -259,5 +263,6 @@ class SettingsActivity : AppCompatActivity() {
         binding.tilDepreciation.error = errors.depreciationError?.let(::getString)
         binding.tilTargetPerKm.error = errors.targetPerKmError?.let(::getString)
         binding.tilTargetPerHour.error = errors.targetPerHourError?.let(::getString)
+        binding.tilDailyGoal.error = errors.dailyGoalError?.let(::getString)
     }
 }

@@ -15,10 +15,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.content.ContextCompat
 import com.example.R
 import com.example.data.HistoryPeriodFilter
 import com.example.data.HistoryRepository
+import com.example.data.SettingsRepository
 import com.example.databinding.ActivityHistoryBinding
+import com.example.engine.DailyGoalProgress
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -54,12 +57,13 @@ class HistoryActivity : AppCompatActivity() {
 
         HistoryViewModel.Factory(
             historyRepository = HistoryRepository(applicationContext),
+            settingsRepository = SettingsRepository(applicationContext),
             initialTab = initialTab
         )
     }
 
     private val currencyFormat: NumberFormat by lazy {
-        NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,6 +130,16 @@ class HistoryActivity : AppCompatActivity() {
                 R.id.chipFilter30Days -> viewModel.selectPeriod(HistoryPeriodFilter.LAST_30_DAYS)
             }
         }
+
+        binding.chipGroupAppFilter.setOnCheckedStateChangeListener { _, checkedIds ->
+            when (checkedIds.firstOrNull()) {
+                R.id.chipFilterAppAll -> viewModel.selectAppFilter(HistoryAppFilter.ALL)
+                R.id.chipFilterAppUber -> viewModel.selectAppFilter(HistoryAppFilter.UBER)
+                R.id.chipFilterApp99 -> viewModel.selectAppFilter(HistoryAppFilter.APP_99)
+                R.id.chipFilterAppInDrive -> viewModel.selectAppFilter(HistoryAppFilter.INDRIVE)
+                R.id.chipFilterAppSimulator -> viewModel.selectAppFilter(HistoryAppFilter.SIMULATOR)
+            }
+        }
     }
 
     private fun observeUiState() {
@@ -134,6 +148,8 @@ class HistoryActivity : AppCompatActivity() {
                 viewModel.uiState.collect { state ->
                     renderActiveTab(state.activeTab)
                     renderPeriodChip(state.periodFilter)
+                    renderAppChip(state.appFilter)
+                    renderDailyGoal(state.dailyGoalProgress)
 
                     adapter.submitList(state.rides)
                     val isEmpty = state.rides.isEmpty()
@@ -191,6 +207,44 @@ class HistoryActivity : AppCompatActivity() {
         }
         if (binding.chipGroupPeriod.checkedChipId != targetId) {
             binding.chipGroupPeriod.check(targetId)
+        }
+    }
+
+    private fun renderAppChip(filter: HistoryAppFilter) {
+        val targetId = when (filter) {
+            HistoryAppFilter.ALL -> R.id.chipFilterAppAll
+            HistoryAppFilter.UBER -> R.id.chipFilterAppUber
+            HistoryAppFilter.APP_99 -> R.id.chipFilterApp99
+            HistoryAppFilter.INDRIVE -> R.id.chipFilterAppInDrive
+            HistoryAppFilter.SIMULATOR -> R.id.chipFilterAppSimulator
+        }
+        if (binding.chipGroupAppFilter.checkedChipId != targetId) {
+            binding.chipGroupAppFilter.check(targetId)
+        }
+    }
+
+    private fun renderDailyGoal(progress: DailyGoalProgress) {
+        binding.tvHistoryDailyGoalProgress.text = getString(
+            R.string.daily_goal_progress_format,
+            currencyFormat.format(progress.todayProfit),
+            currencyFormat.format(progress.dailyGoal),
+            progress.progressPercent
+        )
+        binding.progressHistoryDailyGoal.progress = progress.progressPercent
+        val indicatorColor = ContextCompat.getColor(
+            this,
+            if (progress.isGoalReached) R.color.verdict_accept_accent else R.color.md_theme_secondary
+        )
+        binding.progressHistoryDailyGoal.setIndicatorColor(indicatorColor)
+        binding.tvHistoryDailyGoalProgress.setTextColor(indicatorColor)
+
+        binding.tvHistoryDailyGoalSubtitle.text = if (progress.isGoalReached) {
+            getString(R.string.daily_goal_reached)
+        } else {
+            getString(
+                R.string.daily_goal_remaining_format,
+                currencyFormat.format(progress.remainingAmount)
+            )
         }
     }
 

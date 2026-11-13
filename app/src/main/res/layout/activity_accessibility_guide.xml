@@ -199,6 +199,14 @@
                     android:layout_height="56dp"
                     android:text="@string/action_open_android_accessibility" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOpenDiagnostic"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/action_open_diagnostic" />
+
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>
