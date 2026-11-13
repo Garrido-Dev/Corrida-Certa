@@ -1,0 +1,10 @@
+## ⚠️ Aviso Legal (Disclaimer)
+
+Este é um projeto de código aberto criado para fins **educacionais e de auxílio matemático** à tomada de decisão de motoristas de aplicativo. 
+
+1. **Sem Afiliação:** Este aplicativo não possui qualquer vínculo, patrocínio ou afiliação com a Uber, 99, InDrive ou qualquer outra plataforma de mobilidade.
+2. **Apenas Leitura:** O uso do Serviço de Acessibilidade do Android (AccessibilityService) neste projeto tem como única finalidade a leitura dos dados exibidos na tela (valor, distância e tempo) para realizar cálculos matemáticos. O aplicativo **não executa**, **não automatiza** e **não simula** cliques ou ações (como aceitar ou recusar corridas).
+3. **Responsabilidade:** O desenvolvedor deste projeto não se responsabiliza por quaisquer penalidades, bloqueios ou banimentos aplicados por plataformas de mobilidade aos usuários que optarem por utilizar este software. A decisão de aceitar ou recusar uma corrida e o cumprimento dos termos de uso das plataformas são de responsabilidade exclusiva do motorista.
+4. **Sem Coleta de Dados:** Este aplicativo não coleta, não armazena em servidores externos e não compartilha dados pessoais ou informações de corridas dos usuários.
+
+**Ao instalar e utilizar este aplicativo, você concorda que o faz por sua própria conta e risco.**
