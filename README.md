@@ -199,8 +199,10 @@ O workflow `.github/workflows/build-apk.yml` executa automaticamente a cada `pus
 
 1. Faz checkout do repositório e configura **JDK 17 (Temurin)** com cache do Gradle.
 2. Restaura `debug.keystore` a partir de `debug.keystore.base64` (com fallback via `keytool` caso necessário).
-3. Executa `./gradlew testDebugUnitTest` para garantir que toda a suíte de testes passe antes do empacotamento.
-4. Executa `./gradlew assembleDebug` e publica `app-debug.apk` como artefato do workflow (`app-debug`).
+3. Lê `versionName` e `versionCode` de `app/build.gradle.kts`.
+4. Executa `./gradlew testDebugUnitTest` para garantir que toda a suíte de testes passe antes do empacotamento.
+5. Executa `./gradlew assembleDebug` e renomeia o APK para `Corrida-Certa-v<versão>.apk`.
+6. Publica o APK como artefato na aba *Actions* e **cria ou atualiza automaticamente a Release correspondente (`v<versão>`)** na aba **Releases** com as notas extraídas do `CHANGELOG.md`.
 
 O plugin `com.google.gms.google-services` está comentado em `app/build.gradle.kts` porque o aplicativo não usa serviços do Firebase nem depende de `google-services.json` para compilar.
 
@@ -215,3 +217,9 @@ O projeto adota **Versionamento Semântico (`MAJOR.MINOR.PATCH`)** configurado e
 - **PATCH**: correções de cálculo, parser ou interface sem quebra de comportamento.
 
 Histórico detalhado de entregas em [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## Licença
+
+Distribuído sob a **Licença MIT** em conjunto com o **Aviso Legal (Disclaimer)** de uso por conta e risco do usuário. Consulte [LICENSE](LICENSE) para mais detalhes.

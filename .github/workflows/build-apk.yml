@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,14 +32,63 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Extract app version
+        id: version
+        run: |
+          VERSION_NAME=$(grep -m1 'versionName' app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
+          VERSION_CODE=$(grep -m1 'versionCode' app/build.gradle.kts | awk '{print $NF}')
+          echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION_NAME" >> "$GITHUB_OUTPUT"
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Prepare versioned APK
+        run: |
+          mkdir -p release-assets
+          cp app/build/outputs/apk/debug/app-debug.apk "release-assets/Corrida-Certa-v${{ steps.version.outputs.name }}.apk"
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Corrida-Certa-v${{ steps.version.outputs.name }}
+          path: release-assets/Corrida-Certa-v${{ steps.version.outputs.name }}.apk
+
+      - name: Generate release notes
+        run: |
+          python3 - "${{ steps.version.outputs.name }}" "${{ steps.version.outputs.code }}" > release-notes.md <<'EOF'
+          import re, sys
+          version, code = sys.argv[1], sys.argv[2]
+          notes = ""
+          try:
+              text = open("CHANGELOG.md", encoding="utf-8").read()
+              m = re.search(rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)", text, re.M | re.S)
+              if m:
+                  notes = m.group(1).strip()
+          except FileNotFoundError:
+              pass
+          if not notes:
+              notes = f"Lançamento automático da versão {version} (Build {code})."
+          print(f"## Corrida Certa v{version} (Build {code})\n\n{notes}\n\n---\n> ⚠️ **Aviso Legal:** uso por conta e risco do motorista. Leia o arquivo LICENSE antes de instalar.")
+          EOF
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          APK_PATH="release-assets/Corrida-Certa-v${{ steps.version.outputs.name }}.apk"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK_PATH" --clobber
+            gh release edit "$TAG" --title "Corrida Certa $TAG" --notes-file release-notes.md --latest
+          else
+            gh release create "$TAG" "$APK_PATH" \
+              --target "${{ github.sha }}" \
+              --title "Corrida Certa $TAG" \
+              --notes-file release-notes.md \
+              --latest
+          fi
