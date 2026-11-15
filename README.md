@@ -1,8 +1,16 @@
 # Corrida Certa
 
+**Versão atual:** `1.2.0` (Build `3`) · **Licença:** MIT + Aviso Legal · **100% offline e somente leitura**
+
 Aplicativo Android para motoristas de aplicativo calcularem, em segundos, se uma oferta de corrida compensa antes de aceitar. O app cruza o valor oferecido com o trajeto completo (deslocamento até o passageiro + corrida) e aplica o custo real do veículo para entregar um veredito direto no formato de semáforo.
 
 Todo o processamento roda localmente no aparelho. Não há envio de corridas, valores ou telas lidas para servidores externos.
+
+### Novidades da versão 1.2.0
+- **Nota do passageiro e bloqueio de bairros/áreas:** leitura automática da nota (`★`) e resumo do trecho/bairros, recusando ofertas abaixo da nota mínima ou com termos das áreas bloqueadas configuradas.
+- **Leitura por voz offline (TTS em PT-BR):** anuncia o `R$/km` e a nota em **corridas verdes**, e dispara alerta imediato ao detectar uma **área bloqueada**.
+- **Filtros operacionais extras:** limites opcionais para **valor mínimo da corrida**, **distância máxima de embarque**, além de destaque visual (e opção de atenção amarela) para pagamento em **dinheiro** e **parada extra**.
+- **Custo fixo diário (aluguel / parcela):** desconta automaticamente o valor fixo diário antes de contabilizar o progresso livre rumo à meta do dia.
 
 ---
 
@@ -154,7 +162,7 @@ Declaradas em `app/src/main/AndroidManifest.xml`:
 - `SYSTEM_ALERT_WINDOW`: necessária para desenhar o card flutuante por cima dos aplicativos de corrida.
 - `FOREGROUND_SERVICE` e `FOREGROUND_SERVICE_SPECIAL_USE`: mantém o serviço de overlay ativo com notificação visível enquanto o monitoramento está ligado.
 - `POST_NOTIFICATIONS`: exibe a notificação persistente no Android 13+ com botões rápidos de pausa/retomada.
-- `VIBRATE`: permissão normal usada para emitir alerta tátil discreto quando uma corrida verde (`ACCEPT`) aparece no overlay.
+- `VIBRATE`: permissão normal usada para emitir alerta tátil discreto quando uma corrida verde (`ACCEPT`) aparece no overlay e pulso duplo de atenção em áreas bloqueadas (`BLOCKED_AREA`).
 - `BIND_ACCESSIBILITY_SERVICE`: vinculada exclusivamente ao `RideAccessibilityService`, restrita aos pacotes de Uber, 99 e inDrive.
 
 O app **não solicita** internet, localização em segundo plano, câmera ou acesso a arquivos de mídia.
@@ -188,13 +196,13 @@ Os testes de lógica, banco Room e interface (Espresso sobre Robolectric) rodam 
 ./gradlew testDebugUnitTest
 ```
 
-Cobertura atual em `app/src/test/java/com/example/`:
-- `engine/RideAnalyzerTest.kt` e `DailyGoalCalculatorTest.kt`: fórmulas de lucro, custo/km, transições do semáforo e meta diária.
-- `parser/*Test.kt`: extração de ofertas da Uber, 99, inDrive e roteamento no registro.
-- `data/local/RotaProDatabaseTest.kt` e `RideStatisticsCalculatorTest.kt`: persistência Room e agregados.
-- `service/MonitoringNotificationHelperTest.kt`: canal e ações da notificação persistente.
-- `ui/MainActivityTest.kt`: validação Espresso do formulário manual e cálculo na tela.
-- `ui/MainAndHistoryRobolectricTest.kt`, `OnboardingActivityTest.kt`, `AboutActivityTest.kt` e `DiagnosticActivityTest.kt`: fluxos de tela, histórico, versão dinâmica e diagnóstico offline.
+Cobertura atual em `app/src/test/java/com/example/` (20 suítes / 53 testes):
+- `engine/RideAnalyzerTest.kt` e `DailyGoalCalculatorTest.kt`: fórmulas de lucro, custo/km, transições do semáforo, filtros extras (área bloqueada, nota mínima, valor mínimo, busca máxima, dinheiro, parada extra) e abatimento de custo fixo diário.
+- `parser/RideParsersTest.kt`: extração de ofertas da Uber, 99 e inDrive (valores, km, tempo, nota `★`, pagamento em dinheiro, parada extra e trecho).
+- `data/local/RotaProDatabaseTest.kt`, `data/HistoryRepositoryTest.kt`, `data/SettingsRepositoryTest.kt` e `engine/RideStatisticsCalculatorTest.kt`: persistência Room (v2), DataStore Preferences, histórico e agregados.
+- `service/MonitoringNotificationHelperTest.kt`, `service/OverlayGestureHandlerTest.kt` e `service/VoiceAlertHelperTest.kt`: notificação persistente, gestos do card flutuante e regras de fala TTS seletiva.
+- `ui/MainActivityTest.kt`, `ui/MainViewModelTest.kt`, `ui/SettingsViewModelTest.kt` e `ui/HistoryViewModelTest.kt`: validação do formulário, regras de configurações e fluxos de estado.
+- `ui/MainAndHistoryRobolectricTest.kt`, `OnboardingActivityTest.kt`, `AboutActivityTest.kt` e `DiagnosticActivityTest.kt`: fluxos de tela, histórico com filtros, versão dinâmica e diagnóstico offline.
 
 ---
 
@@ -215,13 +223,13 @@ O plugin `com.google.gms.google-services` está comentado em `app/build.gradle.k
 
 ## Versionamento
 
-O projeto adota **Versionamento Semântico (`MAJOR.MINOR.PATCH`)** configurado em `app/build.gradle.kts` (`versionCode` e `versionName`) e refletido automaticamente na tela principal e na tela **Sobre** via `BuildConfig`:
+O projeto adota **Versionamento Semântico (`MAJOR.MINOR.PATCH`)** configurado em `app/build.gradle.kts` (`versionCode = 3` e `versionName = "1.2.0"`) e refletido automaticamente na tela principal e na tela **Sobre** via `BuildConfig`:
 
 - **MAJOR**: mudanças incompatíveis de fluxo, banco ou estrutura principal.
-- **MINOR**: novas funcionalidades compatíveis (ex.: suporte a novo app de corrida ou exportação de relatório).
+- **MINOR**: novas funcionalidades compatíveis (ex.: suporte a novo app de corrida, filtros extras ou alertas por voz).
 - **PATCH**: correções de cálculo, parser ou interface sem quebra de comportamento.
 
-Histórico detalhado de entregas em [CHANGELOG.md](CHANGELOG.md).
+Histórico detalhado de entregas e notas usadas automaticamente nas Releases do GitHub em [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
