@@ -153,6 +153,116 @@ internal object ParserUtils {
         return results
     }
 
+    // Nota do passageiro (ex.: "★ 4,88", "4.92 ★", "Nota 4.75", "4,85")
+    private val RATING_WITH_STAR_OR_LABEL_REGEX = Regex(
+        pattern = """(?:[★⭐]|nota[:\s]+)\s*([1-5][.,]\d{1,2})|([1-5][.,]\d{1,2})\s*[★⭐]""",
+        option = RegexOption.IGNORE_CASE
+    )
+    private val RATING_STANDALONE_REGEX = Regex(
+        pattern = """^\s*([1-5][.,]\d{1,2})\s*$"""
+    )
+
+    // Indicador de parada extra na oferta
+    private val EXTRA_STOP_REGEX = Regex(
+        pattern = """\b(?:\d+\s*paradas?|com\s+parada|parada\s+(?:extra|intermedi[aá]ria|adicional)|m[uú]ltiplos?\s+destinos?)\b""",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    private val UI_NOISE_ADDRESS_LABELS = setOf(
+        "aceitar", "recusar", "rejeitar", "concordar", "oferecer", "solicitar",
+        "uberx", "uber x", "comfort", "uber black", "black", "flash", "uber flash",
+        "99pop", "99 pop", "99comfort", "99 moto", "99moto", "pop", "indrive",
+        "dinheiro", "em espécie", "em especie", "pix", "cartão", "cartao",
+        "pagamento em dinheiro", "pagamento no app", "com parada"
+    )
+
+    fun extractPassengerRating(nodesText: List<String>): Double? {
+        for (raw in nodesText) {
+            val text = raw.trim()
+            if (text.isEmpty() || text.length > 48) continue
+            val lower = text.lowercase()
+            if (lower.contains("r$") || lower.contains("km") || lower.contains("min") || lower.contains("x")) {
+                continue
+            }
+
+            val starMatch = RATING_WITH_STAR_OR_LABEL_REGEX.find(text)
+            if (starMatch != null) {
+                val numStr = starMatch.groupValues[1].ifEmpty { starMatch.groupValues[2] }
+                val rating = parsePtNumber(numStr)
+                if (rating != null && rating in 1.0..5.0) {
+                    return rating
+                }
+            }
+
+            val standaloneMatch = RATING_STANDALONE_REGEX.find(text)
+            if (standaloneMatch != null) {
+                val rating = parsePtNumber(standaloneMatch.groupValues[1])
+                if (rating != null && rating in 1.0..5.0) {
+                    return rating
+                }
+            }
+        }
+        return null
+    }
+
+    fun extractPaymentMethod(nodesText: List<String>): com.example.model.PaymentMethod {
+        val joined = nodesText.joinToString(" ").lowercase()
+        if (joined.contains("dinheiro") ||
+            joined.contains("em espécie") ||
+            joined.contains("em especie")
+        ) {
+            return com.example.model.PaymentMethod.CASH
+        }
+        if (joined.contains("cartão") ||
+            joined.contains("cartao") ||
+            joined.contains("pix") ||
+            joined.contains("no app") ||
+            joined.contains("carteira")
+        ) {
+            return com.example.model.PaymentMethod.DIGITAL
+        }
+        return com.example.model.PaymentMethod.UNKNOWN
+    }
+
+    fun extractHasExtraStop(nodesText: List<String>): Boolean {
+        val joined = nodesText.joinToString(" ")
+        return EXTRA_STOP_REGEX.containsMatchIn(joined)
+    }
+
+    fun extractRouteSummary(nodesText: List<String>): String? {
+        val candidates = mutableListOf<String>()
+        for (raw in nodesText) {
+            val line = raw.trim()
+            if (line.length < 4 || line.length > 90) continue
+            val lower = line.lowercase()
+
+            if (lower in UI_NOISE_ADDRESS_LABELS) continue
+            if (FARE_REGEX.containsMatchIn(line)) continue
+            if (TIME_THEN_DIST_REGEX.containsMatchIn(line) || DIST_THEN_TIME_REGEX.containsMatchIn(line)) continue
+            if (RATING_STANDALONE_REGEX.matches(line) || RATING_WITH_STAR_OR_LABEL_REGEX.containsMatchIn(line)) continue
+            if (EXTRA_STOP_REGEX.matches(line)) continue
+
+            val onlyMetricOrDigits = Regex("""^[\d.,\s+\-*/()xkmhminr$:]+$""", RegexOption.IGNORE_CASE).matches(line)
+            if (onlyMetricOrDigits) continue
+            if (!line.any { it.isLetter() }) continue
+
+            // Evita linhas que sejam apenas rótulo curto de busca/viagem sem endereço
+            val looksLikePureMetric = (DISTANCE_ONLY_REGEX.containsMatchIn(line) || DURATION_ONLY_REGEX.containsMatchIn(line)) &&
+                !line.contains(",") && !line.contains(" - ") && !line.contains("rua", ignoreCase = true) &&
+                !line.contains("av", ignoreCase = true) && !line.contains("bairro", ignoreCase = true)
+            if (looksLikePureMetric) continue
+
+            if (!candidates.contains(line)) {
+                candidates.add(line)
+            }
+            if (candidates.size >= 3) break
+        }
+
+        if (candidates.isEmpty()) return null
+        val joined = candidates.joinToString(" → ")
+        return if (joined.length > 140) joined.take(137) + "..." else joined
+    }
+
     fun extractFirstDistanceKm(text: String): Double? {
         val match = DISTANCE_ONLY_REGEX.find(text) ?: return null
         val value = parsePtNumber(match.groupValues[1]) ?: return null

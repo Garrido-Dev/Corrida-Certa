@@ -19,16 +19,23 @@ data class SettingsFieldErrors(
     @param:StringRes val consumptionError: Int? = null,
     @param:StringRes val maintenanceError: Int? = null,
     @param:StringRes val depreciationError: Int? = null,
+    @param:StringRes val dailyFixedCostError: Int? = null,
     @param:StringRes val targetPerKmError: Int? = null,
     @param:StringRes val targetPerHourError: Int? = null,
-    @param:StringRes val dailyGoalError: Int? = null
+    @param:StringRes val dailyGoalError: Int? = null,
+    @param:StringRes val minFareError: Int? = null,
+    @param:StringRes val maxPickupKmError: Int? = null,
+    @param:StringRes val minPassengerRatingError: Int? = null
 ) {
     val hasVehicleError: Boolean
         get() = fuelPriceError != null || consumptionError != null ||
-            maintenanceError != null || depreciationError != null
+            maintenanceError != null || depreciationError != null ||
+            dailyFixedCostError != null
 
     val hasGoalsError: Boolean
-        get() = targetPerKmError != null || targetPerHourError != null || dailyGoalError != null
+        get() = targetPerKmError != null || targetPerHourError != null ||
+            dailyGoalError != null || minFareError != null ||
+            maxPickupKmError != null || minPassengerRatingError != null
 
     val hasAnyError: Boolean
         get() = hasVehicleError || hasGoalsError

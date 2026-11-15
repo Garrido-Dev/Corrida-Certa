@@ -22,7 +22,11 @@ import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.R
+import com.example.data.SettingsRepository
 import com.example.databinding.OverlayRideCardBinding
+import com.example.model.DriverSettings
+import com.example.model.PaymentMethod
+import com.example.model.RideAlertType
 import com.example.model.RideVerdict
 import com.example.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +77,8 @@ class OverlayService : Service() {
     private var isDetailsExpanded = false
     private var autoDismissJob: Job? = null
     private var lastAlertedAtMillis: Long = 0L
+    private var currentSettings: DriverSettings = DriverSettings()
+    private var voiceAlertHelper: VoiceAlertHelper? = null
 
     private val currencyFormat: NumberFormat by lazy {
         NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
@@ -82,9 +88,20 @@ class OverlayService : Service() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         themedContext = ContextThemeWrapper(this, R.style.Theme_RotaPro)
+        voiceAlertHelper = VoiceAlertHelper(applicationContext)
         createNotificationChannel()
         startAsForeground()
+        observeSettings()
         observeDetectedRide()
+    }
+
+    private fun observeSettings() {
+        val settingsRepository = SettingsRepository(applicationContext)
+        serviceScope.launch {
+            settingsRepository.settingsFlow.collect { settings ->
+                currentSettings = settings
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -108,6 +125,8 @@ class OverlayService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         removeOverlayView()
+        voiceAlertHelper?.shutdown()
+        voiceAlertHelper = null
         serviceScope.cancel()
     }
 
@@ -191,7 +210,8 @@ class OverlayService : Service() {
         if (isViewAttached) {
             if (detected.detectedAtMillis != lastAlertedAtMillis) {
                 lastAlertedAtMillis = detected.detectedAtMillis
-                HapticFeedbackHelper.vibrateForVerdict(this, detected.analysis.verdict)
+                HapticFeedbackHelper.vibrateForAnalysis(this, detected.analysis)
+                voiceAlertHelper?.speakForDetection(currentSettings, detected.analysis, detected.offer)
             }
             if (!isDetailsExpanded) {
                 startAutoDismissTimer(viewBinding)
@@ -385,13 +405,23 @@ class OverlayService : Service() {
         viewBinding.tvOverlayPerHour.text = currencyFormat.format(analysis.grossPerHour)
         viewBinding.tvOverlayProfit.text = currencyFormat.format(analysis.profit)
 
+        val badges = buildOverlayBadges(detected)
+        if (badges.isNotEmpty()) {
+            viewBinding.tvOverlayAlerts.visibility = View.VISIBLE
+            viewBinding.tvOverlayAlerts.text = badges.joinToString(" • ")
+        } else {
+            viewBinding.tvOverlayAlerts.visibility = View.GONE
+        }
+
+        val routeSuffix = offer.routeSummary?.let { "\nTrecho: $it" }.orEmpty()
         viewBinding.tvOverlayDetailsText.text = getString(
-            R.string.overlay_details_format,
+            R.string.overlay_details_extended_format,
             currencyFormat.format(offer.fare),
             analysis.totalKm,
             analysis.totalMin,
             currencyFormat.format(analysis.totalCost),
-            currencyFormat.format(analysis.netPerKm)
+            currencyFormat.format(analysis.netPerKm),
+            routeSuffix
         )
 
         val coloredTextViews = listOf(
@@ -403,12 +433,49 @@ class OverlayService : Service() {
             viewBinding.tvOverlayPerHour,
             viewBinding.tvOverlayLabelProfit,
             viewBinding.tvOverlayProfit,
+            viewBinding.tvOverlayAlerts,
             viewBinding.tvOverlayHint,
             viewBinding.tvOverlayTimer,
             viewBinding.tvOverlayDetailsText
         )
         coloredTextViews.forEach { it.setTextColor(textColor) }
         viewBinding.progressOverlayTimer.setIndicatorColor(accentColor)
+    }
+
+    private fun buildOverlayBadges(detected: DetectedRideAnalysis): List<String> {
+        val badges = mutableListOf<String>()
+        val offer = detected.offer
+        val analysis = detected.analysis
+
+        offer.passengerRating?.let { rating ->
+            badges.add(getString(R.string.badge_rating_format, rating))
+        }
+        if (RideAlertType.BLOCKED_AREA in analysis.alerts) {
+            val match = analysis.blockedAreaMatch
+            badges.add(
+                if (!match.isNullOrBlank()) {
+                    getString(R.string.alert_blocked_area_with_match, match)
+                } else {
+                    getString(R.string.alert_blocked_area)
+                }
+            )
+        }
+        if (RideAlertType.LOW_RATING in analysis.alerts) {
+            badges.add(getString(R.string.alert_low_rating))
+        }
+        if (RideAlertType.BELOW_MIN_FARE in analysis.alerts) {
+            badges.add(getString(R.string.alert_below_min_fare))
+        }
+        if (RideAlertType.LONG_PICKUP in analysis.alerts) {
+            badges.add(getString(R.string.alert_long_pickup))
+        }
+        if (offer.paymentMethod == PaymentMethod.CASH) {
+            badges.add(getString(R.string.alert_cash_payment))
+        }
+        if (offer.hasExtraStop) {
+            badges.add(getString(R.string.alert_extra_stop))
+        }
+        return badges
     }
 
     private data class OverlayStyle(

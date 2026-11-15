@@ -118,7 +118,15 @@ class SettingsActivity : AppCompatActivity() {
                     depreciationText = binding.etDepreciation.text?.toString().orEmpty(),
                     targetPerKmText = binding.etTargetPerKm.text?.toString().orEmpty(),
                     targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty(),
-                    dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty()
+                    dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty(),
+                    dailyFixedCostText = binding.etDailyFixedCost.text?.toString().orEmpty(),
+                    minFareText = binding.etMinFare.text?.toString().orEmpty(),
+                    maxPickupKmText = binding.etMaxPickupKm.text?.toString().orEmpty(),
+                    minPassengerRatingText = binding.etMinRating.text?.toString().orEmpty(),
+                    blockedAreasText = binding.etBlockedAreas.text?.toString().orEmpty(),
+                    voiceAlertEnabled = binding.switchVoiceAlert.isChecked,
+                    alertCashRide = binding.switchAlertCash.isChecked,
+                    alertExtraStop = binding.switchAlertStop.isChecked
                 )
             }
         }
@@ -127,9 +135,17 @@ class SettingsActivity : AppCompatActivity() {
         binding.etConsumption.doAfterTextChanged { inputWatcher() }
         binding.etMaintenance.doAfterTextChanged { inputWatcher() }
         binding.etDepreciation.doAfterTextChanged { inputWatcher() }
+        binding.etDailyFixedCost.doAfterTextChanged { inputWatcher() }
         binding.etTargetPerKm.doAfterTextChanged { inputWatcher() }
         binding.etTargetPerHour.doAfterTextChanged { inputWatcher() }
         binding.etDailyGoal.doAfterTextChanged { inputWatcher() }
+        binding.etMinFare.doAfterTextChanged { inputWatcher() }
+        binding.etMaxPickupKm.doAfterTextChanged { inputWatcher() }
+        binding.etMinRating.doAfterTextChanged { inputWatcher() }
+        binding.etBlockedAreas.doAfterTextChanged { inputWatcher() }
+        binding.switchVoiceAlert.setOnCheckedChangeListener { _, _ -> inputWatcher() }
+        binding.switchAlertCash.setOnCheckedChangeListener { _, _ -> inputWatcher() }
+        binding.switchAlertStop.setOnCheckedChangeListener { _, _ -> inputWatcher() }
 
         binding.btnSaveSettings.setOnClickListener {
             viewModel.saveSettings(
@@ -139,7 +155,15 @@ class SettingsActivity : AppCompatActivity() {
                 depreciationText = binding.etDepreciation.text?.toString().orEmpty(),
                 targetPerKmText = binding.etTargetPerKm.text?.toString().orEmpty(),
                 targetPerHourText = binding.etTargetPerHour.text?.toString().orEmpty(),
-                dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty()
+                dailyGoalText = binding.etDailyGoal.text?.toString().orEmpty(),
+                dailyFixedCostText = binding.etDailyFixedCost.text?.toString().orEmpty(),
+                minFareText = binding.etMinFare.text?.toString().orEmpty(),
+                maxPickupKmText = binding.etMaxPickupKm.text?.toString().orEmpty(),
+                minPassengerRatingText = binding.etMinRating.text?.toString().orEmpty(),
+                blockedAreasText = binding.etBlockedAreas.text?.toString().orEmpty(),
+                voiceAlertEnabled = binding.switchVoiceAlert.isChecked,
+                alertCashRide = binding.switchAlertCash.isChecked,
+                alertExtraStop = binding.switchAlertStop.isChecked
             )
         }
 
@@ -208,9 +232,17 @@ class SettingsActivity : AppCompatActivity() {
         binding.etConsumption.setText(String.format(Locale.US, "%.1f", settings.consumption))
         binding.etMaintenance.setText(String.format(Locale.US, "%.2f", settings.maintenance))
         binding.etDepreciation.setText(String.format(Locale.US, "%.2f", settings.depreciation))
+        binding.etDailyFixedCost.setText(String.format(Locale.US, "%.2f", settings.dailyFixedCost))
         binding.etTargetPerKm.setText(String.format(Locale.US, "%.2f", settings.targetPerKm))
         binding.etTargetPerHour.setText(String.format(Locale.US, "%.2f", settings.targetPerHour))
         binding.etDailyGoal.setText(String.format(Locale.US, "%.2f", settings.dailyGoal))
+        binding.etMinFare.setText(String.format(Locale.US, "%.2f", settings.minFare))
+        binding.etMaxPickupKm.setText(String.format(Locale.US, "%.1f", settings.maxPickupKm))
+        binding.etMinRating.setText(String.format(Locale.US, "%.2f", settings.minPassengerRating))
+        binding.etBlockedAreas.setText(settings.blockedAreas)
+        binding.switchVoiceAlert.isChecked = settings.voiceAlertEnabled
+        binding.switchAlertCash.isChecked = settings.alertCashRide
+        binding.switchAlertStop.isChecked = settings.alertExtraStop
         isUpdatingFieldsProgrammatically = false
     }
 
@@ -254,6 +286,11 @@ class SettingsActivity : AppCompatActivity() {
             currencyFormat.format(settings.targetPerKm),
             currencyFormat.format(settings.targetPerHour)
         )
+        binding.tvPreviewFixedAndGoal.text = getString(
+            R.string.settings_preview_fixed_format,
+            currencyFormat.format(settings.dailyFixedCost),
+            currencyFormat.format(settings.dailyGoal)
+        )
     }
 
     private fun renderErrors(errors: SettingsFieldErrors) {
@@ -261,8 +298,12 @@ class SettingsActivity : AppCompatActivity() {
         binding.tilConsumption.error = errors.consumptionError?.let(::getString)
         binding.tilMaintenance.error = errors.maintenanceError?.let(::getString)
         binding.tilDepreciation.error = errors.depreciationError?.let(::getString)
+        binding.tilDailyFixedCost.error = errors.dailyFixedCostError?.let(::getString)
         binding.tilTargetPerKm.error = errors.targetPerKmError?.let(::getString)
         binding.tilTargetPerHour.error = errors.targetPerHourError?.let(::getString)
         binding.tilDailyGoal.error = errors.dailyGoalError?.let(::getString)
+        binding.tilMinFare.error = errors.minFareError?.let(::getString)
+        binding.tilMaxPickupKm.error = errors.maxPickupKmError?.let(::getString)
+        binding.tilMinRating.error = errors.minPassengerRatingError?.let(::getString)
     }
 }

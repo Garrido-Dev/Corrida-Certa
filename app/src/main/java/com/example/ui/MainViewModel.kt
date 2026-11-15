@@ -46,7 +46,11 @@ class MainViewModel(
             ) { updatedSettings, todayRides ->
                 updatedSettings to todayRides
             }.collect { (updatedSettings, todayRides) ->
-                val goalProgress = dailyGoalCalculator.calculate(todayRides, updatedSettings.dailyGoal)
+                val goalProgress = dailyGoalCalculator.calculate(
+                    todayRides = todayRides,
+                    dailyGoal = updatedSettings.dailyGoal,
+                    dailyFixedCost = updatedSettings.dailyFixedCost
+                )
                 _uiState.update { current ->
                     val recalculated = lastOffer?.let { offer ->
                         analyzer.analyze(offer, updatedSettings)

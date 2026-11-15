@@ -3,6 +3,7 @@ package com.example.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -17,11 +18,14 @@ import com.example.data.SettingsRepository
 import com.example.databinding.ActivityDiagnosticBinding
 import com.example.engine.RideAnalyzer
 import com.example.model.DriverSettings
+import com.example.model.PaymentMethod
+import com.example.model.RideAlertType
 import com.example.model.RideVerdict
 import com.example.parser.RideParserRegistry
 import com.example.parser.SupportedApp
 import com.example.service.DiagnosticCaptureStatus
 import com.example.service.RideMonitorState
+import com.example.service.VoiceAlertHelper
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -45,6 +49,7 @@ class DiagnosticActivity : AppCompatActivity() {
     private val rideAnalyzer = RideAnalyzer()
     private var selectedApp: SupportedApp = SupportedApp.UBER
     private var currentSettings: DriverSettings = DriverSettings()
+    private var voiceAlertHelper: VoiceAlertHelper? = null
 
     private val currencyFormat: NumberFormat by lazy {
         NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
@@ -59,9 +64,20 @@ class DiagnosticActivity : AppCompatActivity() {
         binding = ActivityDiagnosticBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        voiceAlertHelper = VoiceAlertHelper(applicationContext) {
+            runOnUiThread {
+                Toast.makeText(this, R.string.diagnostic_voice_unavailable, Toast.LENGTH_SHORT).show()
+            }
+        }
         applyEdgeToEdgeInsets()
         setupListeners()
         observeState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        voiceAlertHelper?.shutdown()
+        voiceAlertHelper = null
     }
 
     private fun applyEdgeToEdgeInsets() {
@@ -96,6 +112,10 @@ class DiagnosticActivity : AppCompatActivity() {
         binding.btnDiagLoadSample.setOnClickListener {
             binding.etDiagnosticRawText.setText(sampleTextFor(selectedApp))
             runParserTest()
+        }
+
+        binding.btnDiagTestVoice.setOnClickListener {
+            voiceAlertHelper?.speakText(getString(R.string.tts_test_phrase))
         }
 
         binding.btnDiagClear.setOnClickListener {
@@ -193,7 +213,7 @@ class DiagnosticActivity : AppCompatActivity() {
         }
 
         styleResultCard(bgRes, accentRes, textRes)
-        binding.tvDiagnosticResult.text = getString(
+        val baseText = getString(
             R.string.diagnostic_result_success_format,
             parsed.app.displayName,
             verdictLabel,
@@ -206,6 +226,43 @@ class DiagnosticActivity : AppCompatActivity() {
             currencyFormat.format(analysis.grossPerHour),
             currencyFormat.format(analysis.profit)
         )
+        val ratingText = parsed.offer.passengerRating?.let {
+            getString(R.string.badge_rating_format, it)
+        } ?: getString(R.string.diagnostic_meta_none)
+        val paymentText = when (parsed.offer.paymentMethod) {
+            PaymentMethod.CASH -> getString(R.string.alert_cash_payment)
+            PaymentMethod.DIGITAL -> getString(R.string.badge_digital_payment)
+            PaymentMethod.UNKNOWN -> getString(R.string.diagnostic_meta_none)
+        }
+        val stopText = if (parsed.offer.hasExtraStop) {
+            getString(R.string.diagnostic_yes)
+        } else {
+            getString(R.string.diagnostic_no)
+        }
+        val routeText = parsed.offer.routeSummary ?: getString(R.string.diagnostic_meta_none)
+        val alertsText = if (analysis.alerts.isEmpty()) {
+            getString(R.string.diagnostic_meta_none)
+        } else {
+            analysis.alerts.joinToString(", ") { alert ->
+                when (alert) {
+                    RideAlertType.BLOCKED_AREA -> getString(R.string.alert_blocked_area)
+                    RideAlertType.BELOW_MIN_FARE -> getString(R.string.alert_below_min_fare)
+                    RideAlertType.LONG_PICKUP -> getString(R.string.alert_long_pickup)
+                    RideAlertType.LOW_RATING -> getString(R.string.alert_low_rating)
+                    RideAlertType.CASH_PAYMENT -> getString(R.string.alert_cash_payment)
+                    RideAlertType.EXTRA_STOP -> getString(R.string.alert_extra_stop)
+                }
+            }
+        }
+        val metaText = getString(
+            R.string.diagnostic_meta_format,
+            ratingText,
+            paymentText,
+            stopText,
+            routeText,
+            alertsText
+        )
+        binding.tvDiagnosticResult.text = baseText + metaText
     }
 
     private fun resetResultCard() {
@@ -224,9 +281,9 @@ class DiagnosticActivity : AppCompatActivity() {
     }
 
     private fun sampleTextFor(app: SupportedApp): String = when (app) {
-        SupportedApp.UBER -> "UberX\nR$ 24,50\n4 min (1,2 km) de distância\n16 min (8,5 km) de viagem"
-        SupportedApp.APP_99 -> "99Pop\nR$ 19,80\n3 min (0,9 km)\n14 min (6,8 km)"
-        SupportedApp.INDRIVE -> "R$ 28,00\n2,1 km até você • 5 min\n9,4 km viagem • 18 min"
+        SupportedApp.UBER -> "UberX\nR$ 24,50\n★ 4,88\n4 min (1,2 km) de distância\nRua Augusta, 1200 - Consolação\n16 min (8,5 km) de viagem\nAv. Paulista, 900 - Bela Vista"
+        SupportedApp.APP_99 -> "99Pop\nR$ 19,80\n★ 4,62\nDinheiro • Com parada\n3 min (0,9 km)\nAv. Brasil, Centro\n14 min (6,8 km)"
+        SupportedApp.INDRIVE -> "R$ 28,00\n4,91 ★\n2,1 km até você • 5 min\n9,4 km viagem • 18 min\nBairro Pinheiros"
     }
 
     private data class QuadResultStyle(

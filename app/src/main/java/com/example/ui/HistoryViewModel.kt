@@ -70,7 +70,11 @@ class HistoryViewModel(
             appFilter = appFilter,
             rides = filteredRides,
             statistics = statisticsCalculator.calculate(filteredRides),
-            dailyGoalProgress = dailyGoalCalculator.calculate(todayRides, settings.dailyGoal)
+            dailyGoalProgress = dailyGoalCalculator.calculate(
+                todayRides = todayRides,
+                dailyGoal = settings.dailyGoal,
+                dailyFixedCost = settings.dailyFixedCost
+            )
         )
     }.stateIn(
         scope = viewModelScope,

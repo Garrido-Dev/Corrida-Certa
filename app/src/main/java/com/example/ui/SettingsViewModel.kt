@@ -65,23 +65,40 @@ class SettingsViewModel(
         depreciationText: String,
         targetPerKmText: String,
         targetPerHourText: String,
-        dailyGoalText: String? = null
+        dailyGoalText: String? = null,
+        dailyFixedCostText: String? = null,
+        minFareText: String? = null,
+        maxPickupKmText: String? = null,
+        minPassengerRatingText: String? = null,
+        blockedAreasText: String? = null,
+        voiceAlertEnabled: Boolean? = null,
+        alertCashRide: Boolean? = null,
+        alertExtraStop: Boolean? = null
     ) {
         val current = _uiState.value.previewSettings
-        val updated = DriverSettings(
+        val updated = current.copy(
             fuelPrice = parseBrazilianDouble(fuelPriceText) ?: current.fuelPrice,
             consumption = parseBrazilianDouble(consumptionText) ?: current.consumption,
             maintenance = parseBrazilianDouble(maintenanceText) ?: current.maintenance,
             depreciation = parseBrazilianDouble(depreciationText) ?: current.depreciation,
             targetPerKm = parseBrazilianDouble(targetPerKmText) ?: current.targetPerKm,
             targetPerHour = parseBrazilianDouble(targetPerHourText) ?: current.targetPerHour,
-            dailyGoal = dailyGoalText?.let(::parseBrazilianDouble) ?: current.dailyGoal
+            dailyGoal = dailyGoalText?.let(::parseBrazilianDouble) ?: current.dailyGoal,
+            dailyFixedCost = dailyFixedCostText?.let(::parseBrazilianDouble) ?: current.dailyFixedCost,
+            minFare = minFareText?.let(::parseBrazilianDouble) ?: current.minFare,
+            maxPickupKm = maxPickupKmText?.let(::parseBrazilianDouble) ?: current.maxPickupKm,
+            minPassengerRating = minPassengerRatingText?.let(::parseBrazilianDouble)
+                ?: current.minPassengerRating,
+            blockedAreas = blockedAreasText ?: current.blockedAreas,
+            voiceAlertEnabled = voiceAlertEnabled ?: current.voiceAlertEnabled,
+            alertCashRide = alertCashRide ?: current.alertCashRide,
+            alertExtraStop = alertExtraStop ?: current.alertExtraStop
         )
         _uiState.update { it.copy(previewSettings = updated) }
     }
 
     /**
-     * Valida os campos de custos e metas e persiste no DataStore.
+     * Valida os campos de custos, metas e filtros e persiste no DataStore.
      */
     fun saveSettings(
         fuelPriceText: String,
@@ -90,8 +107,17 @@ class SettingsViewModel(
         depreciationText: String,
         targetPerKmText: String,
         targetPerHourText: String,
-        dailyGoalText: String? = null
+        dailyGoalText: String? = null,
+        dailyFixedCostText: String? = null,
+        minFareText: String? = null,
+        maxPickupKmText: String? = null,
+        minPassengerRatingText: String? = null,
+        blockedAreasText: String? = null,
+        voiceAlertEnabled: Boolean? = null,
+        alertCashRide: Boolean? = null,
+        alertExtraStop: Boolean? = null
     ) {
+        val current = _uiState.value.previewSettings
         val fuelPrice = parseBrazilianDouble(fuelPriceText)
         val consumption = parseBrazilianDouble(consumptionText)
         val maintenance = parseBrazilianDouble(maintenanceText)
@@ -99,9 +125,29 @@ class SettingsViewModel(
         val targetPerKm = parseBrazilianDouble(targetPerKmText)
         val targetPerHour = parseBrazilianDouble(targetPerHourText)
         val dailyGoal = if (dailyGoalText == null) {
-            _uiState.value.previewSettings.dailyGoal
+            current.dailyGoal
         } else {
             parseBrazilianDouble(dailyGoalText)
+        }
+        val dailyFixedCost = if (dailyFixedCostText == null) {
+            current.dailyFixedCost
+        } else {
+            parseOptionalZeroOrDouble(dailyFixedCostText)
+        }
+        val minFare = if (minFareText == null) {
+            current.minFare
+        } else {
+            parseOptionalZeroOrDouble(minFareText)
+        }
+        val maxPickupKm = if (maxPickupKmText == null) {
+            current.maxPickupKm
+        } else {
+            parseOptionalZeroOrDouble(maxPickupKmText)
+        }
+        val minPassengerRating = if (minPassengerRatingText == null) {
+            current.minPassengerRating
+        } else {
+            parseOptionalZeroOrDouble(minPassengerRatingText)
         }
 
         val errors = SettingsFieldErrors(
@@ -125,6 +171,11 @@ class SettingsViewModel(
                 depreciation < 0.0 -> R.string.error_cannot_be_negative
                 else -> null
             },
+            dailyFixedCostError = when {
+                dailyFixedCost == null -> R.string.error_invalid_number
+                dailyFixedCost < 0.0 -> R.string.error_cannot_be_negative
+                else -> null
+            },
             targetPerKmError = when {
                 targetPerKm == null -> R.string.error_invalid_number
                 targetPerKm <= 0.0 -> R.string.error_must_be_positive
@@ -138,6 +189,21 @@ class SettingsViewModel(
             dailyGoalError = when {
                 dailyGoal == null -> R.string.error_invalid_number
                 dailyGoal <= 0.0 -> R.string.error_must_be_positive
+                else -> null
+            },
+            minFareError = when {
+                minFare == null -> R.string.error_invalid_number
+                minFare < 0.0 -> R.string.error_cannot_be_negative
+                else -> null
+            },
+            maxPickupKmError = when {
+                maxPickupKm == null -> R.string.error_invalid_number
+                maxPickupKm < 0.0 -> R.string.error_cannot_be_negative
+                else -> null
+            },
+            minPassengerRatingError = when {
+                minPassengerRating == null -> R.string.error_invalid_number
+                minPassengerRating < 0.0 || minPassengerRating > 5.0 -> R.string.error_rating_range
                 else -> null
             }
         )
@@ -168,7 +234,15 @@ class SettingsViewModel(
             depreciation = depreciation!!,
             targetPerKm = targetPerKm!!,
             targetPerHour = targetPerHour!!,
-            dailyGoal = dailyGoal!!
+            dailyGoal = dailyGoal!!,
+            dailyFixedCost = dailyFixedCost!!,
+            minFare = minFare!!,
+            maxPickupKm = maxPickupKm!!,
+            minPassengerRating = minPassengerRating!!,
+            blockedAreas = (blockedAreasText ?: current.blockedAreas).trim(),
+            voiceAlertEnabled = voiceAlertEnabled ?: current.voiceAlertEnabled,
+            alertCashRide = alertCashRide ?: current.alertCashRide,
+            alertExtraStop = alertExtraStop ?: current.alertExtraStop
         )
 
         viewModelScope.launch {
@@ -187,6 +261,11 @@ class SettingsViewModel(
                 _events.emit(SettingsEvent.Error(R.string.error_saving_settings))
             }
         }
+    }
+
+    private fun parseOptionalZeroOrDouble(raw: String): Double? {
+        if (raw.isBlank()) return 0.0
+        return parseBrazilianDouble(raw)
     }
 
     /**

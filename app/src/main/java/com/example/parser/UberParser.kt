@@ -16,6 +16,10 @@ class UberParser : RideOfferParser {
         }
 
         val fare = ParserUtils.extractFare(nodesText) ?: return null
+        val rating = ParserUtils.extractPassengerRating(nodesText)
+        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
+        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
 
         // Prioriza pares completos (tempo + distância) na ordem típica da Uber: busca depois viagem
         val legs = ParserUtils.extractRouteLegs(nodesText)
@@ -27,7 +31,11 @@ class UberParser : RideOfferParser {
                 pickupKm = pickup.distanceKm,
                 pickupMin = pickup.durationMin,
                 tripKm = trip.distanceKm,
-                tripMin = trip.durationMin
+                tripMin = trip.durationMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
 
@@ -41,7 +49,11 @@ class UberParser : RideOfferParser {
                 pickupKm = 0.0,
                 pickupMin = pickupMin,
                 tripKm = trip.distanceKm,
-                tripMin = trip.durationMin
+                tripMin = trip.durationMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
 
@@ -69,7 +81,11 @@ class UberParser : RideOfferParser {
             pickupKm = pickupKm,
             pickupMin = pickupMin,
             tripKm = tripKm,
-            tripMin = tripMin
+            tripMin = tripMin,
+            passengerRating = rating,
+            routeSummary = routeSummary,
+            paymentMethod = paymentMethod,
+            hasExtraStop = hasExtraStop
         )
         return offer.takeIf { it.totalKm > 0.0 && it.totalMin > 0.0 }
     }

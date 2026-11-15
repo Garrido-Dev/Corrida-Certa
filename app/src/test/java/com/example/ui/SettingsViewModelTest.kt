@@ -130,4 +130,58 @@ class SettingsViewModelTest {
             mockRepo.saveSettings(match { it.dailyGoal == 320.0 })
         }
     }
+
+    @Test
+    fun `saveSettings valida faixa de nota do passageiro e persiste aluguel e areas bloqueadas`() = runTest {
+        val mockRepo = mockk<SettingsRepository>()
+        every { mockRepo.settingsFlow } returns flowOf(DriverSettings())
+        coEvery { mockRepo.saveSettings(any()) } just runs
+
+        val viewModel = SettingsViewModel(mockRepo)
+        viewModel.saveSettings(
+            fuelPriceText = "5,89",
+            consumptionText = "10,0",
+            maintenanceText = "0,15",
+            depreciationText = "0,20",
+            targetPerKmText = "2,00",
+            targetPerHourText = "50,00",
+            dailyGoalText = "250,00",
+            minPassengerRatingText = "5,5"
+        )
+
+        assertEquals(SettingsSection.GOALS, viewModel.uiState.value.activeSection)
+        assertNotNull(viewModel.uiState.value.fieldErrors.minPassengerRatingError)
+        coVerify(exactly = 0) { mockRepo.saveSettings(any()) }
+
+        viewModel.saveSettings(
+            fuelPriceText = "5,89",
+            consumptionText = "10,0",
+            maintenanceText = "0,15",
+            depreciationText = "0,20",
+            targetPerKmText = "2,00",
+            targetPerHourText = "50,00",
+            dailyGoalText = "250,00",
+            dailyFixedCostText = "120,00",
+            minFareText = "10,00",
+            maxPickupKmText = "3,0",
+            minPassengerRatingText = "4,70",
+            blockedAreasText = "Centro, Zona Leste",
+            voiceAlertEnabled = true,
+            alertCashRide = true,
+            alertExtraStop = false
+        )
+
+        coVerify(exactly = 1) {
+            mockRepo.saveSettings(
+                match {
+                    it.dailyFixedCost == 120.0 &&
+                        it.minFare == 10.0 &&
+                        it.maxPickupKm == 3.0 &&
+                        it.minPassengerRating == 4.70 &&
+                        it.blockedAreas == "Centro, Zona Leste" &&
+                        !it.alertExtraStop
+                }
+            )
+        }
+    }
 }

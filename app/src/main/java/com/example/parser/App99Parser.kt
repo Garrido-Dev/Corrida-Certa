@@ -16,6 +16,10 @@ class App99Parser : RideOfferParser {
         }
 
         val fare = ParserUtils.extractFare(nodesText) ?: return null
+        val rating = ParserUtils.extractPassengerRating(nodesText)
+        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
+        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
 
         // Tenta identificar nós explicitamente rotulados primeiro
         var pickupKm: Double? = null
@@ -43,7 +47,11 @@ class App99Parser : RideOfferParser {
                 pickupKm = pickupKm ?: 0.0,
                 pickupMin = pickupMin ?: 0.0,
                 tripKm = tripKm,
-                tripMin = tripMin
+                tripMin = tripMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
 
@@ -55,7 +63,11 @@ class App99Parser : RideOfferParser {
                 pickupKm = legs[0].distanceKm,
                 pickupMin = legs[0].durationMin,
                 tripKm = legs[1].distanceKm,
-                tripMin = legs[1].durationMin
+                tripMin = legs[1].durationMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
         if (legs.size == 1) {
@@ -64,7 +76,11 @@ class App99Parser : RideOfferParser {
                 pickupKm = 0.0,
                 pickupMin = 0.0,
                 tripKm = legs[0].distanceKm,
-                tripMin = legs[0].durationMin
+                tripMin = legs[0].durationMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
 
@@ -83,7 +99,11 @@ class App99Parser : RideOfferParser {
             pickupKm = pKm,
             pickupMin = pMin,
             tripKm = tKm,
-            tripMin = tMin
+            tripMin = tMin,
+            passengerRating = rating,
+            routeSummary = routeSummary,
+            paymentMethod = paymentMethod,
+            hasExtraStop = hasExtraStop
         )
         return offer.takeIf { it.totalKm > 0.0 && it.totalMin > 0.0 }
     }

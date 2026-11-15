@@ -25,6 +25,7 @@ import com.example.R
 import com.example.data.HistoryRepository
 import com.example.data.SettingsRepository
 import com.example.databinding.ActivityMainBinding
+import com.example.model.RideAlertType
 import com.example.model.RideAnalysis
 import com.example.model.RideOffer
 import com.example.model.RideVerdict
@@ -371,9 +372,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderDailyGoal(progress: com.example.engine.DailyGoalProgress) {
+        val displayedProfit = if (progress.dailyFixedCost > 0.0) {
+            progress.netProfitAfterFixedCost
+        } else {
+            progress.todayProfit
+        }
         binding.tvDailyGoalProgress.text = getString(
             R.string.daily_goal_progress_format,
-            currencyFormat.format(progress.todayProfit),
+            currencyFormat.format(displayedProfit),
             currencyFormat.format(progress.dailyGoal),
             progress.progressPercent
         )
@@ -385,10 +391,18 @@ class MainActivity : AppCompatActivity() {
         binding.progressDailyGoal.setIndicatorColor(indicatorColor)
         binding.tvDailyGoalProgress.setTextColor(indicatorColor)
 
-        binding.tvDailyGoalSubtitle.text = if (progress.isGoalReached) {
-            getString(R.string.daily_goal_reached)
-        } else {
-            getString(
+        binding.tvDailyGoalSubtitle.text = when {
+            progress.isGoalReached -> getString(R.string.daily_goal_reached)
+            progress.dailyFixedCost > 0.0 && !progress.isFixedCostCovered -> getString(
+                R.string.daily_fixed_remaining_format,
+                currencyFormat.format(progress.fixedCostRemaining),
+                currencyFormat.format(progress.dailyFixedCost)
+            )
+            progress.dailyFixedCost > 0.0 -> getString(
+                R.string.daily_fixed_covered_remaining_format,
+                currencyFormat.format(progress.remainingAmount)
+            )
+            else -> getString(
                 R.string.daily_goal_remaining_format,
                 currencyFormat.format(progress.remainingAmount)
             )
@@ -422,6 +436,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val alertLabels = formatAlertLabels(analysis)
         when (analysis.verdict) {
             RideVerdict.ACCEPT -> applyVerdictTheme(
                 bgColorRes = R.color.verdict_accept_bg,
@@ -431,19 +446,33 @@ class MainActivity : AppCompatActivity() {
                 title = getString(R.string.verdict_accept_title),
                 description = getString(R.string.verdict_accept_desc)
             )
-            RideVerdict.CAUTION -> applyVerdictTheme(
-                bgColorRes = R.color.verdict_caution_bg,
-                accentColorRes = R.color.verdict_caution_accent,
-                textColorRes = R.color.verdict_caution_text,
-                iconRes = R.drawable.ic_traffic_caution,
-                title = getString(R.string.verdict_caution_title),
-                description = getString(R.string.verdict_caution_desc)
-            )
-            RideVerdict.REJECT -> {
-                val descRes = if (analysis.profit <= 0.0) {
-                    R.string.verdict_loss_desc
+            RideVerdict.CAUTION -> {
+                val desc = if (alertLabels.isNotEmpty()) {
+                    getString(R.string.verdict_caution_alerts_desc, alertLabels.joinToString(", "))
                 } else {
-                    R.string.verdict_reject_desc
+                    getString(R.string.verdict_caution_desc)
+                }
+                applyVerdictTheme(
+                    bgColorRes = R.color.verdict_caution_bg,
+                    accentColorRes = R.color.verdict_caution_accent,
+                    textColorRes = R.color.verdict_caution_text,
+                    iconRes = R.drawable.ic_traffic_caution,
+                    title = getString(R.string.verdict_caution_title),
+                    description = desc
+                )
+            }
+            RideVerdict.REJECT -> {
+                val desc = when {
+                    RideAlertType.BLOCKED_AREA in analysis.alerts -> getString(
+                        R.string.verdict_blocked_desc,
+                        analysis.blockedAreaMatch ?: getString(R.string.alert_blocked_area)
+                    )
+                    analysis.profit <= 0.0 -> getString(R.string.verdict_loss_desc)
+                    alertLabels.isNotEmpty() -> getString(
+                        R.string.verdict_filter_reject_desc,
+                        alertLabels.joinToString(", ")
+                    )
+                    else -> getString(R.string.verdict_reject_desc)
                 }
                 applyVerdictTheme(
                     bgColorRes = R.color.verdict_reject_bg,
@@ -451,7 +480,7 @@ class MainActivity : AppCompatActivity() {
                     textColorRes = R.color.verdict_reject_text,
                     iconRes = R.drawable.ic_traffic_reject,
                     title = getString(R.string.verdict_reject_title),
-                    description = getString(descRes)
+                    description = desc
                 )
             }
         }
@@ -467,6 +496,21 @@ class MainActivity : AppCompatActivity() {
             analysis.totalMin,
             currencyFormat.format(analysis.totalCost)
         )
+    }
+
+    private fun formatAlertLabels(analysis: RideAnalysis): List<String> {
+        return analysis.alerts.map { alert ->
+            when (alert) {
+                RideAlertType.BLOCKED_AREA -> analysis.blockedAreaMatch?.let {
+                    getString(R.string.alert_blocked_area_with_match, it)
+                } ?: getString(R.string.alert_blocked_area)
+                RideAlertType.BELOW_MIN_FARE -> getString(R.string.alert_below_min_fare)
+                RideAlertType.LONG_PICKUP -> getString(R.string.alert_long_pickup)
+                RideAlertType.LOW_RATING -> getString(R.string.alert_low_rating)
+                RideAlertType.CASH_PAYMENT -> getString(R.string.alert_cash_payment)
+                RideAlertType.EXTRA_STOP -> getString(R.string.alert_extra_stop)
+            }
+        }
     }
 
     private fun applyVerdictTheme(

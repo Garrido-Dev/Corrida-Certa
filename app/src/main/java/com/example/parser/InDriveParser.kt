@@ -16,6 +16,10 @@ class InDriveParser : RideOfferParser {
         }
 
         val fare = ParserUtils.extractFare(nodesText) ?: return null
+        val rating = ParserUtils.extractPassengerRating(nodesText)
+        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
+        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
 
         val legs = ParserUtils.extractRouteLegs(nodesText)
         if (legs.size >= 2) {
@@ -24,7 +28,11 @@ class InDriveParser : RideOfferParser {
                 pickupKm = legs[0].distanceKm,
                 pickupMin = legs[0].durationMin,
                 tripKm = legs[1].distanceKm,
-                tripMin = legs[1].durationMin
+                tripMin = legs[1].durationMin,
+                passengerRating = rating,
+                routeSummary = routeSummary,
+                paymentMethod = paymentMethod,
+                hasExtraStop = hasExtraStop
             )
         }
 
@@ -53,7 +61,11 @@ class InDriveParser : RideOfferParser {
             pickupKm = pickupKm,
             pickupMin = pickupMin,
             tripKm = tripKm,
-            tripMin = tripMin
+            tripMin = tripMin,
+            passengerRating = rating,
+            routeSummary = routeSummary,
+            paymentMethod = paymentMethod,
+            hasExtraStop = hasExtraStop
         )
         return offer.takeIf { it.totalKm > 0.0 && it.totalMin > 0.0 }
     }

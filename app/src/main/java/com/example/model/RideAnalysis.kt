@@ -11,6 +11,8 @@ package com.example.model
  * @property totalKm Distância total considerada na análise (busca + viagem).
  * @property totalMin Tempo total considerado na análise (busca + viagem).
  * @property totalCost Custo operacional estimado da corrida (R$).
+ * @property alerts Alertas operacionais e filtros acionados durante a avaliação.
+ * @property blockedAreaMatch Termo da lista de áreas bloqueadas encontrado no trajeto, se houver.
  */
 data class RideAnalysis(
     val grossPerKm: Double,
@@ -20,5 +22,7 @@ data class RideAnalysis(
     val verdict: RideVerdict,
     val totalKm: Double = 0.0,
     val totalMin: Double = 0.0,
-    val totalCost: Double = 0.0
+    val totalCost: Double = 0.0,
+    val alerts: List<RideAlertType> = emptyList(),
+    val blockedAreaMatch: String? = null
 )

@@ -141,13 +141,28 @@
                                 android:text="@string/history_filter_app_indrive" />
                         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnDiagLoadSample"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="@string/diagnostic_load_sample" />
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnDiagLoadSample"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:text="@string/diagnostic_load_sample" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnDiagTestVoice"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_weight="1"
+                                android:text="@string/diagnostic_test_voice" />
+                        </LinearLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/tilDiagnosticInput"

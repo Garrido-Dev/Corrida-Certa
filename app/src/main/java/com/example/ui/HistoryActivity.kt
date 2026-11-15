@@ -224,9 +224,14 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     private fun renderDailyGoal(progress: DailyGoalProgress) {
+        val displayedProfit = if (progress.dailyFixedCost > 0.0) {
+            progress.netProfitAfterFixedCost
+        } else {
+            progress.todayProfit
+        }
         binding.tvHistoryDailyGoalProgress.text = getString(
             R.string.daily_goal_progress_format,
-            currencyFormat.format(progress.todayProfit),
+            currencyFormat.format(displayedProfit),
             currencyFormat.format(progress.dailyGoal),
             progress.progressPercent
         )
@@ -238,10 +243,18 @@ class HistoryActivity : AppCompatActivity() {
         binding.progressHistoryDailyGoal.setIndicatorColor(indicatorColor)
         binding.tvHistoryDailyGoalProgress.setTextColor(indicatorColor)
 
-        binding.tvHistoryDailyGoalSubtitle.text = if (progress.isGoalReached) {
-            getString(R.string.daily_goal_reached)
-        } else {
-            getString(
+        binding.tvHistoryDailyGoalSubtitle.text = when {
+            progress.isGoalReached -> getString(R.string.daily_goal_reached)
+            progress.dailyFixedCost > 0.0 && !progress.isFixedCostCovered -> getString(
+                R.string.daily_fixed_remaining_format,
+                currencyFormat.format(progress.fixedCostRemaining),
+                currencyFormat.format(progress.dailyFixedCost)
+            )
+            progress.dailyFixedCost > 0.0 -> getString(
+                R.string.daily_fixed_covered_remaining_format,
+                currencyFormat.format(progress.remainingAmount)
+            )
+            else -> getString(
                 R.string.daily_goal_remaining_format,
                 currencyFormat.format(progress.remainingAmount)
             )

@@ -45,6 +45,10 @@ class HistoryRepository(
         analysis: RideAnalysis,
         timestamp: Long = clockMillis()
     ): Long {
+        val alertSummary = analysis.alerts
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(",") { it.name }
+
         val entity = RotaProRide(
             appName = appName,
             fare = offer.fare,
@@ -54,7 +58,12 @@ class HistoryRepository(
             grossPerHour = analysis.grossPerHour,
             profit = analysis.profit,
             verdict = analysis.verdict.name,
-            timestamp = timestamp
+            timestamp = timestamp,
+            passengerRating = offer.passengerRating,
+            routeSummary = offer.routeSummary,
+            paymentMethod = offer.paymentMethod.name,
+            hasExtraStop = offer.hasExtraStop,
+            alertSummary = alertSummary
         )
         return rideDao.insertRide(entity)
     }

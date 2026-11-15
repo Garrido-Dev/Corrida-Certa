@@ -2,6 +2,14 @@
 
 Todas as mudanças relevantes deste projeto são documentadas neste arquivo seguindo o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o padrão [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-11-15
+
+### Adicionado
+- **Leitura de nota do passageiro e áreas bloqueadas**: os parsers extraem avaliação (`★`), trecho/bairros, pagamento em dinheiro e parada extra; o motor bloqueia automaticamente corridas com nota abaixo do mínimo ou destino/origem em áreas bloqueadas configuradas pelo motorista.
+- **Leitura por voz offline (`VoiceAlertHelper` / TTS em PT-BR)**: anuncia automaticamente corridas verdes (`ACEITAR`) com `R$/km` e nota do passageiro, além de alertas imediatos quando uma área bloqueada é detectada.
+- **Filtros operacionais e custo fixo diário**: novos ajustes em Configurações para **valor mínimo por corrida**, **distância máxima de embarque**, **custo fixo diário** (aluguel ou parcela abatida da meta do dia) e destaque para pagamento em **dinheiro** ou **parada extra**.
+- **Badges no card flutuante e histórico**: o overlay, o simulador, o diagnóstico (com botão de teste de voz) e os registros no Room v2 (`MIGRATION_1_2`) exibem nota, forma de pagamento, parada extra e motivo dos alertas.
+
 ## [1.1.0] - 2026-11-13
 
 ### Adicionado

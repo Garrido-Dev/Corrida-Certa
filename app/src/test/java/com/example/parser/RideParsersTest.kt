@@ -1,8 +1,11 @@
 package com.example.parser
 
+import com.example.model.PaymentMethod
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -18,10 +21,13 @@ class RideParsersTest {
         val nodes = listOf(
             "UberX",
             "R$ 24,50",
+            "★ 4,88",
             "Inclui + R$ 3,00",
             "R$ 2,52/km",
             "4 min (1,2 km) de distância",
+            "Rua Augusta, 1200 - Consolação",
             "16 min (8,5 km) de viagem",
+            "Av. Paulista, 900 - Bela Vista",
             "Aceitar"
         )
 
@@ -34,6 +40,9 @@ class RideParsersTest {
         assertEquals(4.0, parsed.offer.pickupMin, 0.001)
         assertEquals(8.5, parsed.offer.tripKm, 0.001)
         assertEquals(16.0, parsed.offer.tripMin, 0.001)
+        assertEquals(4.88, parsed.offer.passengerRating!!, 0.001)
+        assertTrue(parsed.offer.routeSummary!!.contains("Consolação"))
+        assertFalse(parsed.offer.hasExtraStop)
     }
 
     @Test
@@ -57,12 +66,16 @@ class RideParsersTest {
     }
 
     @Test
-    fun `App99Parser extrai card rotulado com metros na busca e km na viagem`() {
+    fun `App99Parser extrai card rotulado com dinheiro, parada extra e nota`() {
         val nodes = listOf(
             "99Pop",
             "R$ 19,80",
+            "4,62 ★",
+            "Pagamento em dinheiro",
+            "Com parada",
             "Embarque: 800 m · 3 min",
             "Viagem: 7,5 km · 16 min",
+            "Av. Brasil, Centro",
             "Aceitar corrida"
         )
 
@@ -75,6 +88,9 @@ class RideParsersTest {
         assertEquals(3.0, parsed.offer.pickupMin, 0.001)
         assertEquals(7.5, parsed.offer.tripKm, 0.001)
         assertEquals(16.0, parsed.offer.tripMin, 0.001)
+        assertEquals(4.62, parsed.offer.passengerRating!!, 0.001)
+        assertEquals(PaymentMethod.CASH, parsed.offer.paymentMethod)
+        assertTrue(parsed.offer.hasExtraStop)
     }
 
     @Test

@@ -43,13 +43,15 @@ Valores padrão na primeira instalação (editáveis em **Configurações**):
 - **Bruto por hora**: `fare / (totalMin / 60)`
 - **Líquido por km**: `profit / totalKm`
 
-### 3. Classificação do semáforo
+### 3. Classificação do semáforo e filtros extras
 
 | Veredito | Condição |
 | :--- | :--- |
-| **Aceitar** (`ACCEPT`) | Lucro > 0 **e** `R$/km >= metaKm` **e** `R$/h >= metaHora` |
-| **Avaliar** (`CAUTION`) | Lucro > 0 **e** ambos os indicadores estão dentro de até 20% abaixo da meta (`>= 80%` de cada meta) |
-| **Recusar** (`REJECT`) | Lucro `<= 0`, entrada inválida ou qualquer indicador abaixo de 80% da meta |
+| **Aceitar** (`ACCEPT`) | Lucro > 0, `R$/km >= metaKm`, `R$/h >= metaHora` e nenhum alerta/filtro disparado |
+| **Avaliar** (`CAUTION`) | Lucro > 0 dentro de até 20% abaixo da meta (`>= 80%`), ou corrida que atende metas mas possui aviso operacional (ex.: **dinheiro** ou **parada extra**) |
+| **Recusar** (`REJECT`) | Lucro `<= 0`, abaixo de 80% da meta, **área bloqueada**, valor abaixo do **mínimo por corrida**, **busca acima do limite** ou **nota do passageiro abaixo da mínima** |
+
+Se configurado um **custo fixo diário** (aluguel semanal dividido por dia ou parcela do veículo), o acompanhamento da meta diária desconta primeiro esse valor antes de contabilizar o progresso do lucro livre do dia.
 
 ---
 
@@ -71,15 +73,15 @@ Os textos capturados passam por `RideParserRegistry`, que escolhe o parser pelo 
 
 - **Onboarding (`OnboardingActivity`)**: apresentação em 3 etapas na primeira abertura (ou reaberta pela tela Sobre).
 - **Tela principal (`MainActivity`)**:
-  - Card do semáforo com resultado detalhado (R$/km, R$/h, custo e lucro).
-  - Card de progresso da **Meta diária de lucro** calculada sobre as corridas viáveis de hoje.
-  - Barra de status das permissões de **Sobreposição** e **Acessibilidade**, além do teste rápido do card flutuante (que fecha automaticamente após 15 segundos e vibra discretamente em ofertas verdes).
+  - Card do semáforo com resultado detalhado (`R$/km`, `R$/h`, custo, lucro e motivo caso bloqueada por filtro ou área).
+  - Card de progresso da **Meta diária de lucro**, considerando abatimento de custo fixo diário (aluguel/parcela) quando configurado.
+  - Barra de status das permissões de **Sobreposição** e **Acessibilidade**, além do teste rápido do card flutuante (timer de 15s, alerta háptico, badges de nota/dinheiro/parada e aviso por voz TTS em corridas verdes ou áreas bloqueadas).
   - Formulário manual (valor, distância/tempo até o embarque e distância/tempo da viagem).
   - Acesso direto ao **Histórico**, **Configurações** e **Sobre** (tocando no selo de versão no topo).
-- **Configurações (`SettingsActivity`)**: ajuste de combustível, consumo, manutenção, depreciação, metas (`R$/km`, `R$/h` e meta diária em `R$`) e atalho para **Sobre o aplicativo**.
+- **Configurações (`SettingsActivity`)**: ajuste de combustível, consumo, manutenção, depreciação, custo fixo diário (`R$/dia`), metas (`R$/km`, `R$/h`, meta diária), filtros opcionais (valor mínimo, busca máxima, nota mínima, bairros/áreas bloqueadas), alerta por voz TTS, destaque para dinheiro/parada extra e atalho para **Sobre o aplicativo**.
 - **Guia de Acessibilidade (`AccessibilityGuideActivity`)**: passo a passo objetivo para habilitar o serviço nas configurações do Android e acesso ao **Diagnóstico de leitura**.
-- **Histórico (`HistoryActivity`)**: lista de corridas analisadas com filtro por período (`Hoje`, `7 dias`, `30 dias`) e por aplicativo (`Todos`, `Uber`, `99`, `inDrive`, `Simulador`), progresso da meta diária e resumo de totais.
-- **Diagnóstico (`DiagnosticActivity`)**: exibe o status volátil da última leitura em memória e permite colar ou simular textos de ofertas para validar os parsers offline.
+- **Histórico (`HistoryActivity`)**: lista de corridas analisadas com badges (nota, dinheiro, parada extra, trecho e alertas), filtro por período (`Hoje`, `7 dias`, `30 dias`) e por aplicativo (`Todos`, `Uber`, `99`, `inDrive`, `Simulador`), progresso da meta diária e resumo de totais.
+- **Diagnóstico (`DiagnosticActivity`)**: exibe o status volátil da última leitura em memória, botão para testar a síntese de voz (TTS) e permite colar ou simular textos de ofertas para validar todos os campos extraídos offline.
 - **Sobre (`AboutActivity`)**: exibe versão e build (`BuildConfig.VERSION_NAME` / `VERSION_CODE`), `applicationId`, resumo de privacidade offline e atalhos para tutorial e diagnóstico.
 
 ---
@@ -99,22 +101,25 @@ com/example/
 │   ├── RideStatisticsCalculator.kt   # Agregados do histórico por período e app
 │   └── DailyGoalCalculator.kt        # Cálculo de progresso da meta diária
 ├── model/
-│   ├── DriverSettings.kt             # Custos do veículo e metas do motorista
-│   ├── RideOffer.kt                  # Dados de entrada da oferta
-│   ├── RideAnalysis.kt               # Resultado calculado
+│   ├── DriverSettings.kt             # Custos do veículo, aluguel/dia, metas e filtros
+│   ├── RideOffer.kt                  # Dados extraídos da oferta (valor, km, nota, rota, pagamento, parada)
+│   ├── RideAnalysis.kt               # Resultado calculado e alertas acionados
+│   ├── RideAlertType.kt              # Tipos de alerta (área bloqueada, nota, mínimo, etc.)
+│   ├── PaymentMethod.kt              # Enum UNKNOWN / DIGITAL / CASH
 │   └── RideVerdict.kt                # Enum ACCEPT / CAUTION / REJECT
 ├── parser/
 │   ├── RideOfferParser.kt            # Contrato e modelo ParsedRideOffer
 │   ├── RideParserRegistry.kt         # Roteamento por packageName
-│   ├── ParserUtils.kt                # Extração de R$, km/m e min/h
+│   ├── ParserUtils.kt                # Extração de R$, km/m, min/h, nota ★, dinheiro, parada e bairros
 │   ├── UberParser.kt
 │   ├── App99Parser.kt
 │   └── InDriveParser.kt
 ├── service/
 │   ├── RideAccessibilityService.kt   # Escuta janelas dos apps de corrida
 │   ├── OverlayService.kt             # Card flutuante via WindowManager (timer 15s + Foreground Service)
+│   ├── VoiceAlertHelper.kt           # Síntese de voz offline PT-BR (corrida verde / área bloqueada)
 │   ├── OverlayGestureHandler.kt      # Arraste e toque do card flutuante
-│   ├── HapticFeedbackHelper.kt       # Vibração curta em ofertas verdes (ACCEPT)
+│   ├── HapticFeedbackHelper.kt       # Vibração em ofertas verdes e pulso de atenção em área bloqueada
 │   ├── MonitoringNotificationHelper.kt
 │   ├── AccessibilityStatusHelper.kt
 │   ├── OverlayPermissionHelper.kt

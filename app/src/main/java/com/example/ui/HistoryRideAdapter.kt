@@ -1,6 +1,7 @@
 package com.example.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -9,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.R
 import com.example.data.local.RotaProRide
 import com.example.databinding.ItemHistoryRideBinding
+import com.example.model.PaymentMethod
+import com.example.model.RideAlertType
 import com.example.model.RideVerdict
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -96,6 +99,41 @@ class HistoryRideAdapter(
             binding.btnDeleteRide.setOnClickListener {
                 onDeleteClick(item)
             }
+
+            val metaParts = buildMetadataParts(context, item)
+            if (metaParts.isNotEmpty()) {
+                binding.tvItemMetadata.visibility = View.VISIBLE
+                binding.tvItemMetadata.text = metaParts.joinToString(" • ")
+            } else {
+                binding.tvItemMetadata.visibility = View.GONE
+            }
+        }
+
+        private fun buildMetadataParts(context: android.content.Context, item: RotaProRide): List<String> {
+            val parts = mutableListOf<String>()
+            item.passengerRating?.let { rating ->
+                parts.add(context.getString(R.string.badge_rating_format, rating))
+            }
+            if (item.paymentMethod == PaymentMethod.CASH.name) {
+                parts.add(context.getString(R.string.alert_cash_payment))
+            }
+            if (item.hasExtraStop) {
+                parts.add(context.getString(R.string.alert_extra_stop))
+            }
+            if (!item.alertSummary.isNullOrBlank()) {
+                item.alertSummary.split(',').forEach { key ->
+                    when (key.trim()) {
+                        RideAlertType.BLOCKED_AREA.name -> parts.add(context.getString(R.string.alert_blocked_area))
+                        RideAlertType.BELOW_MIN_FARE.name -> parts.add(context.getString(R.string.alert_below_min_fare))
+                        RideAlertType.LONG_PICKUP.name -> parts.add(context.getString(R.string.alert_long_pickup))
+                        RideAlertType.LOW_RATING.name -> parts.add(context.getString(R.string.alert_low_rating))
+                    }
+                }
+            }
+            item.routeSummary?.takeIf { it.isNotBlank() }?.let { route ->
+                parts.add(route)
+            }
+            return parts.distinct()
         }
     }
 

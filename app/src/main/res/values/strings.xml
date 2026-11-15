@@ -272,4 +272,54 @@
     <string name="diagnostic_result_empty">Informe ou carregue um texto de oferta para inspecionar a extração.</string>
     <string name="diagnostic_result_failed">Nenhuma oferta válida reconhecida para %1$s. Confira se o texto contém valor em R$, distância (km/m) e tempo (min).</string>
     <string name="diagnostic_result_success_format">App: %1$s • Veredito: %2$s\nValor: %3$s\nBusca: %4$.1f km (%5$.0f min)\nViagem: %6$.1f km (%7$.0f min)\nMétricas: %8$s/km • %9$s/h • Lucro: %10$s</string>
+
+    <!-- v1.2.0: Recursos de Apps Pagos (Nota, Áreas Bloqueadas, Filtros, Aluguel e Voz TTS) -->
+    <string name="hint_daily_fixed_cost">Custo fixo diário (R$/dia)</string>
+    <string name="helper_daily_fixed_cost">Aluguel por dia ou parcela/seguro do carro (0 desativa)</string>
+    <string name="settings_preview_fixed_format">Custo fixo/dia: %1$s • Meta livre: %2$s</string>
+
+    <string name="settings_filters_title">Filtros de risco e operação</string>
+    <string name="hint_min_fare">Valor mínimo por corrida (R$)</string>
+    <string name="helper_min_fare">Recusa corridas abaixo deste valor bruto (0 desativa)</string>
+    <string name="hint_max_pickup_km">Busca máxima até o passageiro (km)</string>
+    <string name="helper_max_pickup_km">Recusa embarques acima desta distância (0 desativa)</string>
+    <string name="hint_min_rating">Nota mínima do passageiro (1.0 a 5.0)</string>
+    <string name="helper_min_rating">Recusa passageiro com nota inferior (0 desativa)</string>
+    <string name="hint_blocked_areas">Bairros ou áreas bloqueadas</string>
+    <string name="helper_blocked_areas">Separe por vírgula (ex.: Centro, Morro, Área Rural)</string>
+    <string name="switch_voice_alert">Alerta por voz em corrida verde ou área bloqueada</string>
+    <string name="switch_alert_cash">Destacar pagamento em dinheiro</string>
+    <string name="switch_alert_stop">Destacar corrida com parada extra</string>
+    <string name="error_rating_range">Informe uma nota entre 0 e 5,0</string>
+
+    <string name="daily_fixed_remaining_format">Faltam %1$s para pagar o custo fixo de hoje (%2$s)</string>
+    <string name="daily_fixed_covered_remaining_format">Custo fixo pago! Faltam %1$s para a meta livre</string>
+
+    <string name="alert_blocked_area_with_match">Área bloqueada: %1$s</string>
+    <string name="alert_blocked_area">Área bloqueada</string>
+    <string name="alert_below_min_fare">Abaixo do mínimo</string>
+    <string name="alert_long_pickup">Busca longa</string>
+    <string name="alert_low_rating">Nota baixa</string>
+    <string name="alert_cash_payment">Dinheiro</string>
+    <string name="alert_extra_stop">Parada extra</string>
+    <string name="badge_rating_format">★ %1$.2f</string>
+    <string name="badge_digital_payment">Cartão/App</string>
+
+    <string name="verdict_blocked_desc">Alerta de segurança: destino ou origem na lista bloqueada (%1$s).</string>
+    <string name="verdict_filter_reject_desc">Recusada pelos seus filtros ativos: %1$s.</string>
+    <string name="verdict_caution_alerts_desc">Tarifa atende metas, mas atenção a: %1$s.</string>
+
+    <string name="tts_blocked_area">Atenção, área bloqueada detectada.</string>
+    <string name="tts_blocked_area_named">Atenção, área bloqueada: %1$s.</string>
+    <string name="tts_green_ride">Corrida verde. %1$s por quilômetro.</string>
+    <string name="tts_green_ride_with_rating">Corrida verde. %1$s por quilômetro. Nota %2$s.</string>
+    <string name="tts_test_phrase">Corrida Certa ativo. Corrida verde, dois reais e cinquenta por quilômetro.</string>
+
+    <string name="overlay_details_extended_format">Valor: %1$s • Trajeto: %2$.1f km (%3$.0f min)\nCusto real: %4$s • Líquido/km: %5$s%6$s</string>
+    <string name="diagnostic_test_voice">Testar voz (TTS)</string>
+    <string name="diagnostic_voice_unavailable">Síntese de voz em português não disponível neste aparelho.</string>
+    <string name="diagnostic_meta_format">\nNota: %1$s • Pagamento: %2$s • Parada extra: %3$s\nTrecho: %4$s\nAlertas: %5$s</string>
+    <string name="diagnostic_meta_none">Não identificado</string>
+    <string name="diagnostic_yes">Sim</string>
+    <string name="diagnostic_no">Não</string>
 </resources>
