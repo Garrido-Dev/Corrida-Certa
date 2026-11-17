@@ -142,4 +142,44 @@ class RideParsersTest {
         val validUberNodes = listOf("R$ 25,00", "4 min (1,0 km)", "15 min (8,0 km)")
         assertNull(registry.parse("com.whatsapp", validUberNodes))
     }
+
+    @Test
+    fun `UberParser extrai oferta real com R$ separado, no multilinha e ganhos de hoje ao fundo`() {
+        val realWorldNodes = listOf(
+            "Ganhos de hoje",
+            "R$ 148,00",
+            "UberX\nR$\n24,90\n★ 4,91\n4 min\n(1,2 km)\nRua Augusta, 500\n16 min (8,5 km) de viagem\nAceitar"
+        )
+
+        val parsed = registry.parse("com.ubercab.driver", realWorldNodes)
+
+        assertNotNull(parsed)
+        assertEquals(SupportedApp.UBER, parsed!!.app)
+        assertEquals(24.90, parsed.offer.fare, 0.001)
+        assertEquals(1.2, parsed.offer.pickupKm, 0.001)
+        assertEquals(4.0, parsed.offer.pickupMin, 0.001)
+        assertEquals(8.5, parsed.offer.tripKm, 0.001)
+        assertEquals(16.0, parsed.offer.tripMin, 0.001)
+        assertEquals(4.91, parsed.offer.passengerRating!!, 0.001)
+    }
+
+    @Test
+    fun `UberParser suporta valor acima de mil reais e viagem em hora exata`() {
+        val nodes = listOf(
+            "Comfort",
+            "R$ 1.150,00",
+            "5 min (2,0 km) de distância",
+            "1 h (55 km) de viagem",
+            "Aceitar"
+        )
+
+        val offer = UberParser().parse(nodes)
+
+        assertNotNull(offer)
+        assertEquals(1150.0, offer!!.fare, 0.001)
+        assertEquals(2.0, offer.pickupKm, 0.001)
+        assertEquals(5.0, offer.pickupMin, 0.001)
+        assertEquals(55.0, offer.tripKm, 0.001)
+        assertEquals(60.0, offer.tripMin, 0.001)
+    }
 }

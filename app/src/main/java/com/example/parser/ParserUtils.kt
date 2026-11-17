@@ -26,21 +26,37 @@ internal object ParserUtils {
         "configuracoes da conta"
     )
 
-    // Valor monetário brasileiro (ex.: R$ 24,50 / R$24.50), ignorando taxas como R$ 2,10/km ou R$ 45/h
+    // Rótulos monetários que pertencem a ganhos acumulados/saldo, não ao valor da oferta
+    private val NON_FARE_MONEY_HINTS = listOf(
+        "ganhos",
+        "hoje",
+        "saldo",
+        "bônus",
+        "bonus",
+        "carteira",
+        "meta",
+        "desconto",
+        "taxa"
+    )
+
+    // Valor monetário brasileiro (ex.: R$ 24,50 / R$24.50 / R$ 1.250,00), ignorando taxas como R$ 2,10/km ou R$ 45/h
     private val FARE_REGEX = Regex(
-        pattern = """(?<!\+\s{0,2})(?:R\$|BRL)\s*(\d{1,4}(?:[.,]\d{1,2})?)(?!\s*/\s*(?:km|h|hora|min))""",
+        pattern = """(?<!\+\s{0,2})(?:R\$|BRL)\s*(\d{1,3}(?:\.\d{3})*,\d{1,2}|\d{1,4}(?:[.,]\d{1,2})?)(?!\s*/\s*(?:km|h|hora|min))""",
         option = RegexOption.IGNORE_CASE
     )
 
-    // Par duração + distância na mesma linha (ex.: "4 min (1,2 km)" ou "1 h 10 min • 32,5 km")
+    private val CURRENCY_ONLY_REGEX = Regex("""^(?:R\$|BRL)\s*$""", RegexOption.IGNORE_CASE)
+    private val STANDALONE_AMOUNT_REGEX = Regex("""^(\d{1,3}(?:\.\d{3})*,\d{1,2}|\d{1,4}(?:[.,]\d{1,2})?)$""")
+
+    // Par duração + distância na mesma linha (ex.: "4 min (1,2 km)", "1 h 10 min • 32,5 km", "1 h (60 km)")
     private val TIME_THEN_DIST_REGEX = Regex(
-        pattern = """(?:(\d{1,2})\s*h(?:oras?)?\s*)?(\d{1,3})\s*min(?:utos?|s)?\b[^\n\r]{0,20}?(\d{1,4}(?:[.,]\d{1,2})?)\s*(km|m(?:etros?)?)\b""",
+        pattern = """(?:(\d{1,2})\s*h(?:oras?)?(?:\s*(\d{1,3})\s*min(?:utos?|s)?)?|(\d{1,3})\s*min(?:utos?|s)?)\b[^\n\r]{0,36}?(\d{1,4}(?:[.,]\d{1,2})?)\s*(km|m(?:etros?)?)\b""",
         option = RegexOption.IGNORE_CASE
     )
 
     // Par distância + duração na mesma linha (ex.: "1,2 km · 4 min" ou "850 m (3 min)")
     private val DIST_THEN_TIME_REGEX = Regex(
-        pattern = """(\d{1,4}(?:[.,]\d{1,2})?)\s*(km|m(?:etros?)?)\b[^\n\r]{0,20}?(?:(\d{1,2})\s*h(?:oras?)?\s*)?(\d{1,3})\s*min(?:utos?|s)?\b""",
+        pattern = """(\d{1,4}(?:[.,]\d{1,2})?)\s*(km|m(?:etros?)?)\b[^\n\r]{0,36}?(?:(\d{1,2})\s*h(?:oras?)?(?:\s*(\d{1,3})\s*min(?:utos?|s)?)?|(\d{1,3})\s*min(?:utos?|s)?)\b""",
         option = RegexOption.IGNORE_CASE
     )
 
@@ -50,69 +66,174 @@ internal object ParserUtils {
         option = RegexOption.IGNORE_CASE
     )
 
-    // Duração isolada (ex.: "18 min" ou "1 h 05 min")
+    // Duração isolada (ex.: "18 min", "1 h 05 min", "2 h")
     private val DURATION_ONLY_REGEX = Regex(
-        pattern = """(?:(\d{1,2})\s*h(?:oras?)?\s*)?(\d{1,3})\s*min(?:utos?|s)?\b""",
+        pattern = """(?:(\d{1,2})\s*h(?:oras?)?(?:\s*(\d{1,3})\s*min(?:utos?|s)?)?|(\d{1,3})\s*min(?:utos?|s)?)\b""",
         option = RegexOption.IGNORE_CASE
     )
 
+    private val PURE_DURATION_LINE_REGEX = Regex(
+        pattern = """^\s*~?(?:(\d{1,2})\s*h(?:oras?)?(?:\s*(\d{1,3})\s*min(?:utos?|s)?)?|(\d{1,3})\s*min(?:utos?|s)?)\s*(?:de\s+dist[aâ]ncia|at[eé]\s+voc[eê]|de\s+viagem)?\s*$""",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    private val PURE_DISTANCE_LINE_REGEX = Regex(
+        pattern = """^\s*\(?\s*~?(\d{1,4}(?:[.,]\d{1,2})?)\s*(km|m(?:etros?)?)\s*\)?\s*(?:de\s+dist[aâ]ncia|de\s+viagem)?\s*$""",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    /**
+     * Divide nós multilinha (comuns em cards Compose / semantics mescladas) em linhas limpas.
+     */
+    fun normalizeNodesText(nodesText: List<String>): List<String> {
+        val normalized = mutableListOf<String>()
+        for (raw in nodesText) {
+            raw.lineSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .forEach { line -> normalized.add(line) }
+        }
+        return normalized
+    }
+
     fun isLikelyNonOfferScreen(nodesText: List<String>): Boolean {
-        val joined = nodesText.joinToString(" ").lowercase()
-        return NON_OFFER_KEYWORDS.any { keyword -> joined.contains(keyword) }
+        val lines = normalizeNodesText(nodesText)
+        val joined = lines.joinToString(" ").lowercase()
+        val hasNonOfferKeyword = NON_OFFER_KEYWORDS.any { keyword -> joined.contains(keyword) }
+        if (!hasNonOfferKeyword) return false
+
+        // Se houver sinais fortes de oferta ativa sobreposta (ex.: aba oculta ao fundo), não bloqueia
+        val hasActiveOfferSignals = lines.any { line ->
+            val lower = line.lowercase()
+            lower == "aceitar" ||
+                lower == "aceitar corrida" ||
+                lower.contains("corresponder") ||
+                lower.contains("de distância") ||
+                lower.contains("de distancia") ||
+                lower.contains("de viagem") ||
+                lower.contains("até o passageiro") ||
+                lower.contains("ate o passageiro")
+        } || extractRouteLegs(lines).isNotEmpty()
+
+        return !hasActiveOfferSignals
     }
 
     /**
-     * Extrai o valor principal da corrida em reais dentro de uma faixa realista.
+     * Extrai o valor principal da corrida em reais dentro de uma faixa realista,
+     * aceitando inclusive nós separados ("R$" seguido de "24,50") e evitando pílulas de ganhos.
      */
     fun extractFare(nodesText: List<String>): Double? {
-        for (node in nodesText) {
-            val trimmed = node.trim()
-            if (trimmed.isEmpty()) continue
-            val match = FARE_REGEX.find(trimmed) ?: continue
-            val value = parsePtNumber(match.groupValues[1]) ?: continue
-            if (value in 3.0..2500.0) {
-                return value
+        val lines = normalizeNodesText(nodesText)
+        val candidates = mutableListOf<Pair<Int, Double>>()
+
+        for (i in lines.indices) {
+            val trimmed = lines[i]
+            val lower = trimmed.lowercase()
+            val prevLower = lines.getOrNull(i - 1)?.lowercase().orEmpty()
+            val isNonOfferMoney = NON_FARE_MONEY_HINTS.any { hint ->
+                lower.contains(hint) || prevLower.contains(hint)
+            }
+            if (isNonOfferMoney) continue
+
+            val match = FARE_REGEX.find(trimmed)
+            if (match != null) {
+                val value = parsePtNumber(match.groupValues[1])
+                if (value != null && value in 3.0..2500.0) {
+                    candidates.add(i to value)
+                    continue
+                }
+            }
+
+            if (CURRENCY_ONLY_REGEX.matches(trimmed) && i + 1 < lines.size) {
+                val nextLine = lines[i + 1]
+                val nextMatch = STANDALONE_AMOUNT_REGEX.find(nextLine)
+                if (nextMatch != null) {
+                    val value = parsePtNumber(nextMatch.groupValues[1])
+                    if (value != null && value in 3.0..2500.0) {
+                        candidates.add(i to value)
+                    }
+                }
             }
         }
-        return null
+
+        if (candidates.isEmpty()) return null
+        if (candidates.size == 1) return candidates.first().second
+
+        // Se houver mais de um valor na tela (ex.: ganhos do dia no topo + tarifa da oferta),
+        // prioriza o candidato mais próximo de sinais típicos do card da oferta.
+        val best = candidates.maxByOrNull { (index, _) ->
+            val windowStart = (index - 4).coerceAtLeast(0)
+            val windowEnd = (index + 5).coerceAtMost(lines.lastIndex)
+            var score = 0
+            for (j in windowStart..windowEnd) {
+                val l = lines[j].lowercase()
+                if (l.contains("aceitar") || l.contains("corresponder")) score += 4
+                if (l.contains("uber") || l.contains("comfort") || l.contains("black") ||
+                    l.contains("flash") || l.contains("99") || l.contains("indrive")
+                ) score += 2
+                if (l.contains("km") || l.contains("min") || l.contains("★") || l.contains("⭐")) score += 2
+                if (l.contains("dinheiro") || l.contains("parada")) score += 1
+            }
+            score
+        }
+        return best?.second ?: candidates.first().second
     }
 
     /**
-     * Extrai pares (distância, duração) quando aparecem combinados no mesmo nó ou linha.
+     * Extrai pares (distância, duração) quando aparecem combinados no mesmo nó ou em par imediato.
      */
     fun extractRouteLegs(nodesText: List<String>): List<RouteLeg> {
+        val lines = normalizeNodesText(nodesText)
         val legs = mutableListOf<RouteLeg>()
-        for (raw in nodesText) {
-            val text = raw.trim()
-            if (text.isEmpty()) continue
+        val consumedAdjacentIndices = mutableSetOf<Int>()
 
-            val timeFirstMatch = TIME_THEN_DIST_REGEX.find(text)
-            if (timeFirstMatch != null) {
-                val hours = timeFirstMatch.groupValues[1].toIntOrNull() ?: 0
-                val mins = timeFirstMatch.groupValues[2].toIntOrNull() ?: 0
-                val distValue = parsePtNumber(timeFirstMatch.groupValues[3])
-                val unit = timeFirstMatch.groupValues[4]
-                if (distValue != null) {
+        for (i in lines.indices) {
+            if (i in consumedAdjacentIndices) continue
+            val text = lines[i]
+            var matchedAnyInLine = false
+
+            TIME_THEN_DIST_REGEX.findAll(text).forEach { match ->
+                val totalMin = parseDurationMinutes(match.groupValues[1], match.groupValues[2], match.groupValues[3])
+                val distValue = parsePtNumber(match.groupValues[4])
+                val unit = match.groupValues[5]
+                if (distValue != null && totalMin > 0.0) {
                     val distKm = toKilometers(distValue, unit)
-                    val totalMin = (hours * 60 + mins).toDouble()
-                    if (distKm > 0.0 && totalMin > 0.0) {
+                    if (distKm > 0.0) {
                         legs.add(RouteLeg(distanceKm = distKm, durationMin = totalMin))
-                        continue
+                        matchedAnyInLine = true
                     }
                 }
             }
 
-            val distFirstMatch = DIST_THEN_TIME_REGEX.find(text)
-            if (distFirstMatch != null) {
-                val distValue = parsePtNumber(distFirstMatch.groupValues[1])
-                val unit = distFirstMatch.groupValues[2]
-                val hours = distFirstMatch.groupValues[3].toIntOrNull() ?: 0
-                val mins = distFirstMatch.groupValues[4].toIntOrNull() ?: 0
-                if (distValue != null) {
-                    val distKm = toKilometers(distValue, unit)
-                    val totalMin = (hours * 60 + mins).toDouble()
-                    if (distKm > 0.0 && totalMin > 0.0) {
-                        legs.add(RouteLeg(distanceKm = distKm, durationMin = totalMin))
+            if (!matchedAnyInLine) {
+                DIST_THEN_TIME_REGEX.findAll(text).forEach { match ->
+                    val distValue = parsePtNumber(match.groupValues[1])
+                    val unit = match.groupValues[2]
+                    val totalMin = parseDurationMinutes(match.groupValues[3], match.groupValues[4], match.groupValues[5])
+                    if (distValue != null && totalMin > 0.0) {
+                        val distKm = toKilometers(distValue, unit)
+                        if (distKm > 0.0) {
+                            legs.add(RouteLeg(distanceKm = distKm, durationMin = totalMin))
+                            matchedAnyInLine = true
+                        }
+                    }
+                }
+            }
+
+            // Trata nós adjacentes separados apenas em tempo seguido imediatamente de distância (ex.: "4 min" + "(1,2 km)")
+            if (!matchedAnyInLine && i + 1 < lines.size) {
+                val durMatch = PURE_DURATION_LINE_REGEX.matchEntire(text)
+                val distMatch = PURE_DISTANCE_LINE_REGEX.matchEntire(lines[i + 1])
+                if (durMatch != null && distMatch != null) {
+                    val totalMin = parseDurationMinutes(durMatch.groupValues[1], durMatch.groupValues[2], durMatch.groupValues[3])
+                    val distVal = parsePtNumber(distMatch.groupValues[1])
+                    val unit = distMatch.groupValues[2]
+                    if (distVal != null && totalMin > 0.0) {
+                        val distKm = toKilometers(distVal, unit)
+                        if (distKm > 0.0) {
+                            legs.add(RouteLeg(distanceKm = distKm, durationMin = totalMin))
+                            consumedAdjacentIndices.add(i + 1)
+                        }
                     }
                 }
             }
@@ -121,10 +242,9 @@ internal object ParserUtils {
     }
 
     fun extractStandaloneDistancesKm(nodesText: List<String>): List<Double> {
+        val lines = normalizeNodesText(nodesText)
         val results = mutableListOf<Double>()
-        for (raw in nodesText) {
-            val text = raw.trim()
-            if (text.isEmpty()) continue
+        for (text in lines) {
             DISTANCE_ONLY_REGEX.findAll(text).forEach { match ->
                 val number = parsePtNumber(match.groupValues[1]) ?: return@forEach
                 val km = toKilometers(number, match.groupValues[2])
@@ -137,14 +257,11 @@ internal object ParserUtils {
     }
 
     fun extractStandaloneDurationsMin(nodesText: List<String>): List<Double> {
+        val lines = normalizeNodesText(nodesText)
         val results = mutableListOf<Double>()
-        for (raw in nodesText) {
-            val text = raw.trim()
-            if (text.isEmpty()) continue
+        for (text in lines) {
             DURATION_ONLY_REGEX.findAll(text).forEach { match ->
-                val hours = match.groupValues[1].toIntOrNull() ?: 0
-                val mins = match.groupValues[2].toIntOrNull() ?: 0
-                val totalMin = (hours * 60 + mins).toDouble()
+                val totalMin = parseDurationMinutes(match.groupValues[1], match.groupValues[2], match.groupValues[3])
                 if (totalMin in 1.0..600.0) {
                     results.add(totalMin)
                 }
@@ -173,13 +290,13 @@ internal object ParserUtils {
         "uberx", "uber x", "comfort", "uber black", "black", "flash", "uber flash",
         "99pop", "99 pop", "99comfort", "99 moto", "99moto", "pop", "indrive",
         "dinheiro", "em espécie", "em especie", "pix", "cartão", "cartao",
-        "pagamento em dinheiro", "pagamento no app", "com parada"
+        "pagamento em dinheiro", "pagamento no app", "com parada", "exclusivo"
     )
 
     fun extractPassengerRating(nodesText: List<String>): Double? {
-        for (raw in nodesText) {
-            val text = raw.trim()
-            if (text.isEmpty() || text.length > 48) continue
+        val lines = normalizeNodesText(nodesText)
+        for (text in lines) {
+            if (text.length > 48) continue
             val lower = text.lowercase()
             if (lower.contains("r$") || lower.contains("km") || lower.contains("min") || lower.contains("x")) {
                 continue
@@ -206,7 +323,7 @@ internal object ParserUtils {
     }
 
     fun extractPaymentMethod(nodesText: List<String>): com.example.model.PaymentMethod {
-        val joined = nodesText.joinToString(" ").lowercase()
+        val joined = normalizeNodesText(nodesText).joinToString(" ").lowercase()
         if (joined.contains("dinheiro") ||
             joined.contains("em espécie") ||
             joined.contains("em especie")
@@ -225,19 +342,19 @@ internal object ParserUtils {
     }
 
     fun extractHasExtraStop(nodesText: List<String>): Boolean {
-        val joined = nodesText.joinToString(" ")
+        val joined = normalizeNodesText(nodesText).joinToString(" ")
         return EXTRA_STOP_REGEX.containsMatchIn(joined)
     }
 
     fun extractRouteSummary(nodesText: List<String>): String? {
+        val lines = normalizeNodesText(nodesText)
         val candidates = mutableListOf<String>()
-        for (raw in nodesText) {
-            val line = raw.trim()
+        for (line in lines) {
             if (line.length < 4 || line.length > 90) continue
             val lower = line.lowercase()
 
             if (lower in UI_NOISE_ADDRESS_LABELS) continue
-            if (FARE_REGEX.containsMatchIn(line)) continue
+            if (FARE_REGEX.containsMatchIn(line) || CURRENCY_ONLY_REGEX.matches(line)) continue
             if (TIME_THEN_DIST_REGEX.containsMatchIn(line) || DIST_THEN_TIME_REGEX.containsMatchIn(line)) continue
             if (RATING_STANDALONE_REGEX.matches(line) || RATING_WITH_STAR_OR_LABEL_REGEX.containsMatchIn(line)) continue
             if (EXTRA_STOP_REGEX.matches(line)) continue
@@ -271,14 +388,24 @@ internal object ParserUtils {
 
     fun extractFirstDurationMin(text: String): Double? {
         val match = DURATION_ONLY_REGEX.find(text) ?: return null
-        val hours = match.groupValues[1].toIntOrNull() ?: 0
-        val mins = match.groupValues[2].toIntOrNull() ?: 0
-        val totalMin = (hours * 60 + mins).toDouble()
+        val totalMin = parseDurationMinutes(match.groupValues[1], match.groupValues[2], match.groupValues[3])
         return totalMin.takeIf { it > 0.0 }
     }
 
+    private fun parseDurationMinutes(hoursStr: String, minsAfterHoursStr: String, minsOnlyStr: String): Double {
+        val hours = hoursStr.toIntOrNull() ?: 0
+        val mins = (minsAfterHoursStr.ifEmpty { minsOnlyStr }).toIntOrNull() ?: 0
+        return (hours * 60 + mins).toDouble()
+    }
+
     private fun parsePtNumber(raw: String): Double? {
-        return raw.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() }
+        val trimmed = raw.trim()
+        val normalized = if (trimmed.contains(',') && trimmed.contains('.')) {
+            trimmed.replace(".", "").replace(',', '.')
+        } else {
+            trimmed.replace(',', '.')
+        }
+        return normalized.toDoubleOrNull()?.takeIf { it.isFinite() }
     }
 
     private fun toKilometers(value: Double, unit: String): Double {

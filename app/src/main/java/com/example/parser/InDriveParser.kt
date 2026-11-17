@@ -11,17 +11,18 @@ class InDriveParser : RideOfferParser {
     override val app: SupportedApp = SupportedApp.INDRIVE
 
     override fun parse(nodesText: List<String>): RideOffer? {
-        if (nodesText.isEmpty() || ParserUtils.isLikelyNonOfferScreen(nodesText)) {
+        val normalized = ParserUtils.normalizeNodesText(nodesText)
+        if (normalized.isEmpty() || ParserUtils.isLikelyNonOfferScreen(normalized)) {
             return null
         }
 
-        val fare = ParserUtils.extractFare(nodesText) ?: return null
-        val rating = ParserUtils.extractPassengerRating(nodesText)
-        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
-        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
-        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
+        val fare = ParserUtils.extractFare(normalized) ?: return null
+        val rating = ParserUtils.extractPassengerRating(normalized)
+        val routeSummary = ParserUtils.extractRouteSummary(normalized)
+        val paymentMethod = ParserUtils.extractPaymentMethod(normalized)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(normalized)
 
-        val legs = ParserUtils.extractRouteLegs(nodesText)
+        val legs = ParserUtils.extractRouteLegs(normalized)
         if (legs.size >= 2) {
             return RideOffer(
                 fare = fare,

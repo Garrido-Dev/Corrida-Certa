@@ -1,6 +1,6 @@
 # Corrida Certa
 
-**Versão atual:** `1.2.0` (Build `3`) · **Licença:** MIT + Aviso Legal · **100% offline e somente leitura**
+**Versão atual:** `1.2.1` (Build `4`) · **Licença:** MIT + Aviso Legal · **100% offline e somente leitura**
 
 Aplicativo Android para motoristas de aplicativo calcularem, em segundos, se uma oferta de corrida compensa antes de aceitar. O app cruza o valor oferecido com o trajeto completo (deslocamento até o passageiro + corrida) e aplica o custo real do veículo para entregar um veredito direto no formato de semáforo.
 
@@ -196,7 +196,7 @@ Os testes de lógica, banco Room e interface (Espresso sobre Robolectric) rodam 
 ./gradlew testDebugUnitTest
 ```
 
-Cobertura atual em `app/src/test/java/com/example/` (20 suítes / 53 testes):
+Cobertura atual em `app/src/test/java/com/example/` (20 suítes / 55 testes):
 - `engine/RideAnalyzerTest.kt` e `DailyGoalCalculatorTest.kt`: fórmulas de lucro, custo/km, transições do semáforo, filtros extras (área bloqueada, nota mínima, valor mínimo, busca máxima, dinheiro, parada extra) e abatimento de custo fixo diário.
 - `parser/RideParsersTest.kt`: extração de ofertas da Uber, 99 e inDrive (valores, km, tempo, nota `★`, pagamento em dinheiro, parada extra e trecho).
 - `data/local/RotaProDatabaseTest.kt`, `data/HistoryRepositoryTest.kt`, `data/SettingsRepositoryTest.kt` e `engine/RideStatisticsCalculatorTest.kt`: persistência Room (v2), DataStore Preferences, histórico e agregados.
@@ -223,7 +223,7 @@ O plugin `com.google.gms.google-services` está comentado em `app/build.gradle.k
 
 ## Versionamento
 
-O projeto adota **Versionamento Semântico (`MAJOR.MINOR.PATCH`)** configurado em `app/build.gradle.kts` (`versionCode = 3` e `versionName = "1.2.0"`) e refletido automaticamente na tela principal e na tela **Sobre** via `BuildConfig`:
+O projeto adota **Versionamento Semântico (`MAJOR.MINOR.PATCH`)** configurado em `app/build.gradle.kts` (`versionCode = 4` e `versionName = "1.2.1"`) e refletido automaticamente na tela principal e na tela **Sobre** via `BuildConfig`:
 
 - **MAJOR**: mudanças incompatíveis de fluxo, banco ou estrutura principal.
 - **MINOR**: novas funcionalidades compatíveis (ex.: suporte a novo app de corrida, filtros extras ou alertas por voz).

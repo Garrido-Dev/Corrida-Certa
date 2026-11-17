@@ -26,7 +26,8 @@ data class DiagnosticCaptureStatus(
     val app: SupportedApp?,
     val parsedSuccessfully: Boolean,
     val summary: String? = null,
-    val updatedAtMillis: Long = System.currentTimeMillis()
+    val updatedAtMillis: Long = System.currentTimeMillis(),
+    val nodeCount: Int = 0
 )
 
 /**

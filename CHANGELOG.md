@@ -2,6 +2,14 @@
 
 Todas as mudanças relevantes deste projeto são documentadas neste arquivo seguindo o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o padrão [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.1] - 2026-11-16
+
+### Corrigido
+- **Detecção em tempo real na Uber (`RideAccessibilityService` + `accessibility_service_config.xml`)**: adicionada leitura de todas as janelas interativas (`flagRetrieveInteractiveWindows` + `typeWindowsChanged`) para capturar popups/overlays flutuantes de corrida mesmo sobre outras telas, além de aumento do limite de leitura para 1500 nós.
+- **Fim do apagamento prematuro do card e starvation por timer animado**: substituído o cancelamento contínuo de debounce por throttle não-bloqueante (evitando perda da leitura durante a contagem regressiva da Uber) e removido o reset instantâneo do card quando há atualização transitória de janela.
+- **Leitura ampliada de formatos reais da Uber (`ParserUtils` / `UberParser`)**: suporte a texto multilinha do Jetpack Compose, cifra `R$` separada do valor numérico, separador de milhar, duração em hora exata (`1 h`), priorização do valor da oferta sobre pílula de ganhos do topo e proteção contra falsos bloqueios por abas ocultas de ganhos.
+- **Diagnóstico e Guia de Acessibilidade**: exibição da quantidade de textos lidos e alerta caso a permissão de sobreposição esteja pendente, além da instrução sobre **Configurações restritas** no Android 13+ para APKs externos.
+
 ## [1.2.0] - 2026-11-15
 
 ### Adicionado

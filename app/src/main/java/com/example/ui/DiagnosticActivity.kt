@@ -24,6 +24,7 @@ import com.example.model.RideVerdict
 import com.example.parser.RideParserRegistry
 import com.example.parser.SupportedApp
 import com.example.service.DiagnosticCaptureStatus
+import com.example.service.OverlayPermissionHelper
 import com.example.service.RideMonitorState
 import com.example.service.VoiceAlertHelper
 import kotlinx.coroutines.launch
@@ -147,16 +148,21 @@ class DiagnosticActivity : AppCompatActivity() {
     }
 
     private fun renderLiveStatus(status: DiagnosticCaptureStatus?) {
+        val overlayWarning = if (!OverlayPermissionHelper.hasOverlayPermission(this)) {
+            getString(R.string.diagnostic_live_overlay_warning)
+        } else {
+            ""
+        }
         if (status == null) {
-            binding.tvDiagnosticLiveStatus.setText(R.string.diagnostic_live_status_empty)
+            binding.tvDiagnosticLiveStatus.text = getString(R.string.diagnostic_live_status_empty) + overlayWarning
             return
         }
         val appLabel = status.app?.displayName ?: status.packageName
         val timeText = timeFormat.format(Date(status.updatedAtMillis))
-        val outcome = if (status.parsedSuccessfully) {
-            status.summary ?: getString(R.string.diagnostic_live_ok)
-        } else {
-            getString(R.string.diagnostic_live_miss)
+        val outcome = when {
+            status.parsedSuccessfully -> status.summary ?: getString(R.string.diagnostic_live_ok)
+            status.nodeCount > 0 -> getString(R.string.diagnostic_live_miss_with_nodes, status.nodeCount)
+            else -> getString(R.string.diagnostic_live_miss)
         }
         binding.tvDiagnosticLiveStatus.text = getString(
             R.string.diagnostic_live_status_format,
@@ -164,7 +170,7 @@ class DiagnosticActivity : AppCompatActivity() {
             status.packageName,
             outcome,
             timeText
-        )
+        ) + overlayWarning
     }
 
     private fun runParserTest() {

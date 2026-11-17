@@ -59,7 +59,9 @@ class OverlayService : Service() {
             val intent = Intent(context, OverlayService::class.java).apply {
                 action = ACTION_START_OR_UPDATE
             }
-            ContextCompat.startForegroundService(context, intent)
+            runCatching {
+                ContextCompat.startForegroundService(context, intent)
+            }
         }
 
         fun stop(context: Context) {

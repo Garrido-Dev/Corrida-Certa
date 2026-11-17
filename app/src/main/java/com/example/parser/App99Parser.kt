@@ -11,15 +11,16 @@ class App99Parser : RideOfferParser {
     override val app: SupportedApp = SupportedApp.APP_99
 
     override fun parse(nodesText: List<String>): RideOffer? {
-        if (nodesText.isEmpty() || ParserUtils.isLikelyNonOfferScreen(nodesText)) {
+        val normalized = ParserUtils.normalizeNodesText(nodesText)
+        if (normalized.isEmpty() || ParserUtils.isLikelyNonOfferScreen(normalized)) {
             return null
         }
 
-        val fare = ParserUtils.extractFare(nodesText) ?: return null
-        val rating = ParserUtils.extractPassengerRating(nodesText)
-        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
-        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
-        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
+        val fare = ParserUtils.extractFare(normalized) ?: return null
+        val rating = ParserUtils.extractPassengerRating(normalized)
+        val routeSummary = ParserUtils.extractRouteSummary(normalized)
+        val paymentMethod = ParserUtils.extractPaymentMethod(normalized)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(normalized)
 
         // Tenta identificar nós explicitamente rotulados primeiro
         var pickupKm: Double? = null
@@ -27,7 +28,7 @@ class App99Parser : RideOfferParser {
         var tripKm: Double? = null
         var tripMin: Double? = null
 
-        for (raw in nodesText) {
+        for (raw in normalized) {
             val lower = raw.lowercase()
             when {
                 lower.contains("embarque") || lower.contains("busca") || lower.contains("até o passageiro") -> {

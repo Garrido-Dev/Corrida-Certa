@@ -11,18 +11,19 @@ class UberParser : RideOfferParser {
     override val app: SupportedApp = SupportedApp.UBER
 
     override fun parse(nodesText: List<String>): RideOffer? {
-        if (nodesText.isEmpty() || ParserUtils.isLikelyNonOfferScreen(nodesText)) {
+        val normalized = ParserUtils.normalizeNodesText(nodesText)
+        if (normalized.isEmpty() || ParserUtils.isLikelyNonOfferScreen(normalized)) {
             return null
         }
 
-        val fare = ParserUtils.extractFare(nodesText) ?: return null
-        val rating = ParserUtils.extractPassengerRating(nodesText)
-        val routeSummary = ParserUtils.extractRouteSummary(nodesText)
-        val paymentMethod = ParserUtils.extractPaymentMethod(nodesText)
-        val hasExtraStop = ParserUtils.extractHasExtraStop(nodesText)
+        val fare = ParserUtils.extractFare(normalized) ?: return null
+        val rating = ParserUtils.extractPassengerRating(normalized)
+        val routeSummary = ParserUtils.extractRouteSummary(normalized)
+        val paymentMethod = ParserUtils.extractPaymentMethod(normalized)
+        val hasExtraStop = ParserUtils.extractHasExtraStop(normalized)
 
         // Prioriza pares completos (tempo + distância) na ordem típica da Uber: busca depois viagem
-        val legs = ParserUtils.extractRouteLegs(nodesText)
+        val legs = ParserUtils.extractRouteLegs(normalized)
         if (legs.size >= 2) {
             val pickup = legs[0]
             val trip = legs[1]
@@ -39,14 +40,18 @@ class UberParser : RideOfferParser {
             )
         }
 
-        // Caso alternativo: busca exibe apenas tempo (ex.: "3 min") e viagem exibe par completo "15 min (8,0 km)"
+        // Caso alternativo: busca exibe apenas tempo/distância e viagem exibe par completo "15 min (8,0 km)"
         if (legs.size == 1) {
             val trip = legs[0]
-            val allDurations = ParserUtils.extractStandaloneDurationsMin(nodesText)
-            val pickupMin = allDurations.firstOrNull { it != trip.durationMin } ?: 0.0
+            val remainingDurations = ParserUtils.extractStandaloneDurationsMin(normalized).toMutableList()
+            remainingDurations.remove(trip.durationMin)
+            val remainingDistances = ParserUtils.extractStandaloneDistancesKm(normalized).toMutableList()
+            remainingDistances.remove(trip.distanceKm)
+            val pickupMin = remainingDurations.firstOrNull() ?: 0.0
+            val pickupKm = remainingDistances.firstOrNull() ?: 0.0
             return RideOffer(
                 fare = fare,
-                pickupKm = 0.0,
+                pickupKm = pickupKm,
                 pickupMin = pickupMin,
                 tripKm = trip.distanceKm,
                 tripMin = trip.durationMin,
@@ -58,8 +63,8 @@ class UberParser : RideOfferParser {
         }
 
         // Fallback seguro com distâncias e durações separadas em nós distintos
-        val distances = ParserUtils.extractStandaloneDistancesKm(nodesText)
-        val durations = ParserUtils.extractStandaloneDurationsMin(nodesText)
+        val distances = ParserUtils.extractStandaloneDistancesKm(normalized)
+        val durations = ParserUtils.extractStandaloneDurationsMin(normalized)
         if (distances.isEmpty() || durations.isEmpty()) {
             return null
         }

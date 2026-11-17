@@ -115,6 +115,7 @@
     <string name="accessibility_step_2">2. Acesse "Apps instalados" ou "Serviços transferidos".</string>
     <string name="accessibility_step_3">3. Selecione "Corrida Certa • Leitor de Corridas".</string>
     <string name="accessibility_step_4">4. Ative a chave principal e confirme a permissão.</string>
+    <string name="accessibility_step_5_restricted">Dica (Android 13+ / APK externo): se o botão aparecer bloqueado como "Configuração restrita", abra Informações do app → menu ⋮ (topo direito) → "Permitir configurações restritas", e deixe a bateria como "Sem restrições".</string>
     <string name="action_open_android_accessibility">Abrir Acessibilidade</string>
     <string name="error_open_accessibility_settings">Não foi possível abrir as configurações de acessibilidade neste aparelho.</string>
 
@@ -259,10 +260,12 @@
     <string name="diagnostic_screen_title">Diagnóstico de leitura</string>
     <string name="action_open_diagnostic">Testar leitura de ofertas</string>
     <string name="diagnostic_live_status_title">Última leitura do serviço</string>
-    <string name="diagnostic_live_status_empty">Nenhuma tela de app de corrida inspecionada nesta sessão ainda.</string>
+    <string name="diagnostic_live_status_empty">Nenhuma tela de app de corrida inspecionada nesta sessão ainda. Abra a Uber/99/inDrive com o serviço ativo e aguarde chegar uma oferta.</string>
     <string name="diagnostic_live_status_format">App: %1$s (%2$s)\nStatus: %3$s • %4$s</string>
     <string name="diagnostic_live_ok">Oferta reconhecida</string>
     <string name="diagnostic_live_miss">Tela sem card de oferta válido</string>
+    <string name="diagnostic_live_miss_with_nodes">Tela sem card de oferta válido (%1$d textos lidos — aguardando oferta)</string>
+    <string name="diagnostic_live_overlay_warning">\nAtenção: ative "Sobrepor a outros apps" na tela inicial para o card aparecer.</string>
     <string name="diagnostic_sandbox_title">Simulador de texto da tela</string>
     <string name="diagnostic_sandbox_desc">Cole abaixo o texto capturado de um card da Uber, 99 ou inDrive (ou carregue um exemplo) para validar o que o leitor extrai.</string>
     <string name="diagnostic_load_sample">Carregar exemplo</string>
